@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 const rawUnpaid = row["未収金"]?.trim() || "";
                 const unpaid = rawUnpaid === "なし" ? "0" : rawUnpaid;
-                const memo = row["メモ"]?.trim() || "0";
+                const memo = (row["メモ"] ?? "").trim().replace(/,/g, '、');
                 return [reservation, room, reserver, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash.slice(0, 8), unpaid, memo];
               }));
 
