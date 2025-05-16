@@ -147,6 +147,7 @@ function fillFormWithData(data) {
   document.getElementById("checkOut").value = data.checkOut || "";
   document.getElementById("guests").value = data.guestCount || "";
   document.getElementById("reservation").value = data.reservation || "";
+  document.getElementById("payment").value = data.unpaid || "";
   document.getElementById("breakfast").value = data.breakfastFlag === 1 ? "O" : data.breakfastFlag === 0 ? "X" : "";
 }
 

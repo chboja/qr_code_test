@@ -19,7 +19,9 @@ function doGet(e) {
         checkIn: row[3],
         checkOut: row[4],
         guestCount: row[5],
-        breakfastFlag: row[6]
+        breakfastFlag: row[6],
+        unpaid: row[9],     
+        memo: row[10] 
       }));
 
       return ContentService
@@ -49,7 +51,9 @@ function doGet(e) {
         checkIn: row[3],
         checkOut: row[4],
         guestCount: row[5],
-        breakfastFlag: row[6]
+        breakfastFlag: row[6],
+        unpaid: row[9],
+        memo: row[10] 
       }));
 
       return ContentService
