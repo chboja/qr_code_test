@@ -21,7 +21,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycby3-oAvIFzyhPhGfRNQC2YzdcsoFXhWT-yHDKgnPIKhYrboCoAa1eO0XUjoFq4k_LfZrA/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbxaJpB9tiT42eNI0GCKgRLRg_K6pIpX521RFnE5mWIJAVBfMmH2pZNFo5VNpsLNC7m44Q/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
