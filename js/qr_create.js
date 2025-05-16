@@ -141,6 +141,7 @@ function toHalfWidthKana(str) {
 const normalize = str => toHalfWidth(str).toLowerCase().replace(/\s+/g, "");
 
 function fillFormWithData(data) {
+  console.log("🧾 fillFormWithData:", data);
   document.getElementById("name").value = data.name || "";
   document.getElementById("room").value = data.room || "";
   document.getElementById("checkIn").value = data.checkIn || "";
