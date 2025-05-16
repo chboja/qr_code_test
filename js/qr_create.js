@@ -266,26 +266,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const hash = await generateHash(room, checkIn, checkOut, guests, reservation);
       const qrText = `${room},${checkIn},${checkOut},${guests},${reservation},${hash}`;
 
-      // ✅ 텍스트 정보 표시
+      // ✅ 팝업 티켓 정보 표시
       const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}<br>Booking No : ${reservation}`;
-      const qrTextInfo = document.getElementById("qrTextInfo");
-      qrTextInfo.innerHTML = textInfo;
-      qrTextInfo.style.marginTop = "100px"; // Apply visual gap below button
-      qrTextInfo.style.fontSize = "12px";
-
-      // ✅ QR 코드 생성 (작게)
-      const qrResult = document.getElementById("qrResult");
-      qrResult.innerHTML = "";
-      new QRCode(qrResult, {
+      document.getElementById("popupText").innerHTML = textInfo;
+      const popupQR = document.getElementById("popupQR");
+      popupQR.innerHTML = "";
+      new QRCode(popupQR, {
         text: qrText,
-        width: 120,
-        height: 120,
-        correctLevel: QRCode.CorrectLevel.L
+        width: 160,
+        height: 160,
+        correctLevel: QRCode.CorrectLevel.H
       });
-
-      // Hide form and show ticket
-      document.getElementById("qrTicket").style.display = "block";
-      document.getElementById("qrForm").style.display = "none";
+      document.getElementById("qrOverlay").style.display = "flex";
     });
   
     // ✅ Enter 키 입력 시 키보드 닫기
@@ -444,4 +436,8 @@ function uploadCsvChunksSequentially(chunks, index = 0, SHEET_API_URL) {
     }
     uploadCsvChunksSequentially(chunks, index + 1, SHEET_API_URL);
   };
+}
+// ✅ 팝업 닫기 함수
+function closePopup() {
+  document.getElementById("qrOverlay").style.display = "none";
 }

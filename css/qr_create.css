@@ -144,9 +144,46 @@ body {
   width: 280px;
 }
 
-.room-search button {
-  padding: 8px 12px;
+  .room-search button {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: auto;
+    min-width: 60px;
+  }
+
+/* ✅ 팝업 오버레이 및 티켓 스타일 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.popup button {
+  margin-top: 10px;
+  padding: 6px 12px;
   font-size: 14px;
-  width: auto;
-  min-width: 60px;
+  background-color: #2e86de;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background-color: #1b4f9c;
 }
