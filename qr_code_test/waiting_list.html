@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>朝食待機リスト</title>
+  <link rel="stylesheet" href="css/waiting_list.css" />
+  <script src="js/html5-qrcode.min.js"></script>
+  <script src="js/waiting_list.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Left side: QR scanner -->
+    <div class="scanner-section">
+      <h2 class="qr-title">QR Code</h2>
+      <div id="reader" class="qr-reader"></div>
+      <input type="text" id="qrResult" placeholder="QRコードの内容" />
+      <button id="searchButton" class="wide-button">検索</button>
+    </div>
+
+    <!-- Right side: Waiting list display -->
+    <div class="list-section">
+      <h2 class="list-title">List</h2>
+      <div id="List" class="button-grid">
+      </div>
+    </div>
+  </div> <!-- end of .container -->
+
+  <!-- Custom modal input for guest count -->
+  <div id="customPromptOverlay" style="display: none;">
+    <div class="custom-prompt-box">
+      <p>朝食を取る人数を入力してください。</p>
+      <input type="number" id="guestCountInput" inputmode="numeric" />
+      <div class="custom-prompt-buttons">
+          <button onclick="closeCustomPrompt()">キャンセル</button>
+          <button onclick="submitGuestCount()">確定</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
