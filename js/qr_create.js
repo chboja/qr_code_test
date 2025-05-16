@@ -176,7 +176,7 @@ window.handleSearchResult = function(response) {
         return `${mm}/${dd}`;
       };
       const nameOptions = foundResults.map((item, index) =>
-        `${index + 1}: ${item.name}（#${item.room}）, ${formatToMMDD(item.checkIn)} ~ ${formatToMMDD(item.checkOut)}`
+        `${index + 1}. ${item.name}, #${item.room}, ${formatToMMDD(item.checkIn)}-${formatToMMDD(item.checkOut)}`
       ).join("\n");
       const selected = prompt(`複数の一致が見つかりました。番号を選んでください:\n${nameOptions}`);
       const selectedIndex = parseInt(selected, 10) - 1;
