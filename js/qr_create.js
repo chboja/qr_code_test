@@ -278,6 +278,13 @@ document.addEventListener("DOMContentLoaded", () => {
         correctLevel: QRCode.CorrectLevel.H
       });
       document.getElementById("qrOverlay").style.display = "flex";
+      // Make overlay dismissible by clicking outside the popup
+      const qrOverlay = document.getElementById("qrOverlay");
+      qrOverlay.addEventListener("click", function (e) {
+        if (e.target === qrOverlay) {
+          qrOverlay.style.display = "none";
+        }
+      });
     });
   
     // ✅ Enter 키 입력 시 키보드 닫기
