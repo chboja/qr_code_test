@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }));
 
             console.log("📊 JSONP 전送用 문자열 배열 (with searchName):", compacted);
-            const CHUNK_SIZE = 30;
+            const CHUNK_SIZE = 10;
             const expectedCount = compacted.length;
             const SHEET_API_URL = getSheetApiUrl();
 
