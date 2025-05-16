@@ -418,7 +418,12 @@ function uploadCsvChunksSequentially(chunks, index = 0, SHEET_API_URL) {
 
   const chunk = chunks[index];
   const csvChunk = chunk.map(row =>
-    row.map(cell => String(cell).replace(/,/g, '、')).join(',')
+    row.map(cell =>
+      String(cell)
+        .replace(/\u00A0/g, '')
+        .replace(/&nbsp;/g, '')
+        .replace(/,/g, '、')
+    ).join(',')
   ).join(';');
   const script = document.createElement("script");
   script.src = `${SHEET_API_URL}?callback=uploadChunkCallback&csv=${encodeURIComponent(csvChunk)}`;
