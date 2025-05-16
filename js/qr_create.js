@@ -282,6 +282,10 @@ document.addEventListener("DOMContentLoaded", () => {
         height: 120,
         correctLevel: QRCode.CorrectLevel.L
       });
+
+      // Hide form and show ticket
+      document.getElementById("qrTicket").style.display = "block";
+      document.getElementById("qrForm").style.display = "none";
     });
   
     // ✅ Enter 키 입력 시 키보드 닫기
