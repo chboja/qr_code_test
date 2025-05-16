@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }));
 
             console.log("📊 JSONP 전送用 문자열 배열 (with searchName):", compacted);
-            const CHUNK_SIZE = 10;
+            const CHUNK_SIZE = 15;
             const expectedCount = compacted.length;
             const SHEET_API_URL = getSheetApiUrl();
 
@@ -417,7 +417,9 @@ function uploadCsvChunksSequentially(chunks, index = 0, SHEET_API_URL) {
   if (index >= chunks.length) return;
 
   const chunk = chunks[index];
-  const csvChunk = chunk.map(row => row.join(',')).join(';');
+  const csvChunk = chunk.map(row =>
+    row.map(cell => String(cell).replace(/,/g, '、')).join(',')
+  ).join(';');
   const script = document.createElement("script");
   script.src = `${SHEET_API_URL}?callback=uploadChunkCallback&csv=${encodeURIComponent(csvChunk)}`;
   document.body.appendChild(script);
