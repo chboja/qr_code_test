@@ -64,11 +64,32 @@ wanakanaScript.onload = () => {
         alert("wanakana error");
         return;
       }
+      // --- Show search overlay before sending requests ---
+      const overlay = document.createElement("div");
+      overlay.id = "searchOverlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100vw";
+      overlay.style.height = "100vh";
+      overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+      overlay.style.display = "flex";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.style.zIndex = "9999";
+      overlay.style.color = "white";
+      overlay.style.fontSize = "24px";
+      overlay.textContent = "検索中…";
+      document.body.appendChild(overlay);
+
       console.log("🧪 名前検索クリック");
       const baseInput = document.getElementById("name").value.trim();
       console.log("🔍 検索対象の入力:", baseInput);
       if (!baseInput) {
         alert("名前を入力してください。");
+        // Remove overlay if input is empty and early return
+        const existingOverlay = document.getElementById("searchOverlay");
+        if (existingOverlay) existingOverlay.remove();
         return;
       }
 
@@ -148,8 +169,12 @@ function fillFormWithData(data) {
   document.getElementById("checkOut").value = data.checkOut || "";
   document.getElementById("guests").value = data.guestCount || "";
   document.getElementById("reservation").value = data.reservation || "";
-  document.getElementById("payment").value = data.unpaid || "";
+  document.getElementById("payment").value = data.unpaid !== undefined ? String(data.unpaid) : "";
   document.getElementById("breakfast").value = data.breakfastFlag === 1 ? "O" : data.breakfastFlag === 0 ? "X" : "";
+  // Show alert popup if memo exists
+  if (data.memo && data.memo.trim() !== "") {
+    alert(`📌 メモ:\n${data.memo}`);
+  }
 }
 
 window.handleSearchResult = function(response) {
@@ -162,6 +187,10 @@ window.handleSearchResult = function(response) {
   }
 
   if (pendingNameRequests === 0) {
+    // Remove search overlay
+    const existingOverlay = document.getElementById("searchOverlay");
+    if (existingOverlay) existingOverlay.remove();
+
     if (foundResults.length === 0) {
       alert("一致する名前が見つかりませんでした。");
       return;
@@ -223,6 +252,10 @@ window.handleVerifyResponse = function(response) {
 // 部屋番号検索のJSONPコールバック
 window.handleRoomSearchResult = function(response) {
   console.log("🔍 部屋番号検索結果:", response);
+  // Remove search overlay (in case it was shown, e.g., for future compatibility)
+  const existingOverlay = document.getElementById("searchOverlay");
+  if (existingOverlay) existingOverlay.remove();
+
   if (!response.success || !response.matches || response.matches.length === 0) {
     alert("一致する部屋番号が見つかりませんでした。");
     return;
