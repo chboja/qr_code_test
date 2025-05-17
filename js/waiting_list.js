@@ -158,6 +158,10 @@ document.addEventListener("DOMContentLoaded", () => {
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
                 alert("すみません、フロントでご確認ください。");
+                // Resume QR scanning after alert
+                html5QrCode.resume().catch(err => {
+                  console.error("QRコード再開エラー:", err);
+                });
               }
             })
             .catch(err => {
@@ -486,6 +490,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
     document.getElementById("customPromptOverlay").style.display = "none";
+
+    // Restart QR scanner after submitting guest count
+    html5QrCode.start(
+      { facingMode: "user" },
+      {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const boxSize = Math.floor(minEdge * 0.7);
+          return { width: boxSize, height: boxSize };
+        }
+      },
+      onScanSuccess
+    ).catch(err => {
+      console.error("カメラ再起動エラー:", err);
+    });
   };
 
   window.closeCustomPrompt = function() {
