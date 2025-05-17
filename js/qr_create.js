@@ -448,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   : (row["プラン名"]?.toLowerCase().includes("room only") ? 0 : 1);
 
                 const days = checkOut && checkIn ? Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)) : "";
-                const hash = await generateHash(room, checkIn, checkOut, guestCount, reservation);
+                const hash = await generateHash(room, checkIn, checkOut, guestCount, reservation, breakfastFlag);
 
                 let searchName = reserver;
                 if (window.wanakana) {
