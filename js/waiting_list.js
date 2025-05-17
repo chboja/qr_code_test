@@ -368,7 +368,18 @@ document.addEventListener("DOMContentLoaded", () => {
     button.classList.add("dynamic-button");
     button.textContent = `${text}号 ${guests}名`;
     button.onclick = () => {
-      alert(`"${text}" (${guests}名) ボタンがクリックされました`);
+      const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+      const index = localData.findIndex(entry => entry.split(",")[0] === text);
+      if (index !== -1) {
+        const [roomNum, guests, timestamp] = localData[index].split(",");
+        const updatedEntry = `${roomNum},${guests},${timestamp},1`;
+        localData[index] = updatedEntry;
+        localStorage.setItem("waitingList", JSON.stringify(localData));
+
+        const jsonpScript = document.createElement("script");
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+        document.body.appendChild(jsonpScript);
+      }
     };
 
     const listContainer = document.getElementById("List");
