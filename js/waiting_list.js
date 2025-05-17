@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     let val = parseInt(inputEl.value) || 1;
                     const max = window.maxGuestsFromQR || 10;
                     if (val < max) inputEl.value = val + 1;
-                  };ㄱ
+                  };
 
                   // Save to localStorage
                   const now = new Date();
