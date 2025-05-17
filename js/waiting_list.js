@@ -1,5 +1,54 @@
 const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbz8gAPzSSjqgmXgWYqZJb4HAf2A7Bt3j70FKngVsiJ7yrGiGAND9QH61iSBdOu7qMDeYw/exec";
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Message strings for alerts ---
+  const messages = {
+    alreadyHadBreakfast: {
+      ja: "すでに朝食を召し上がりました。",
+      en: "This room has already had breakfast."
+    },
+    roomOnly: {
+      ja: "Room Onlyプランです。",
+      en: "This room is a Room Only plan."
+    },
+    invalidQR: {
+      ja: "QRコードが無効です。",
+      en: "Invalid QR code."
+    },
+    confirmAtFront: {
+      ja: "すみません、フロントでご確認ください。",
+      en: "Please check with the front desk."
+    },
+    enterGuests: {
+      ja: "人数を入力してください。",
+      en: "Please enter the number of guests."
+    },
+    guestLimitExceeded: (max) => ({
+      ja: `最大人数は${max}名です。`,
+      en: `The maximum number of guests is ${max}.`
+    })
+  };
+  // --- Helper to get current formatted time ---
+  function getCurrentFormattedTime() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  }
+  // --- Helper to update localStorage waitingList entry ---
+  function updateLocalStorageEntry(room, guests, timestamp, status = "0") {
+    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+    const newData = `${room},${parseInt(guests)},${timestamp},${status}`;
+    const index = localData.findIndex(entry => entry.split(",")[0] === room);
+    if (index !== -1) {
+      localData[index] = newData;
+    } else {
+      localData.push(newData);
+    }
+    localStorage.setItem("waitingList", JSON.stringify(localData));
+  }
   // --- Custom Alert Modal Helper ---
   function showCustomAlert(message) {
     const overlay = document.createElement("div");
@@ -15,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // Prevent duplicate scans of the same QR code
   let lastScannedText = "";
+  let lastScannedTime = 0;
   // --- Reusable QR scanner restart function ---
   function restartQrScanner() {
     html5QrCode.stop().then(() => {
@@ -109,10 +159,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const html5QrCode = new Html5Qrcode(qrRegionId);
 
   function onScanSuccess(decodedText, decodedResult) {
-    if (decodedText === lastScannedText) {
-      return; // Prevent duplicate scans of the same QR code
+    const now = Date.now();
+    if (decodedText === lastScannedText && now - lastScannedTime < 5000) {
+      return; // Skip if scanned same QR within 5 seconds
     }
     lastScannedText = decodedText;
+    lastScannedTime = now;
     // html5QrCode.pause(); // 중복 스캔 방지 (비활성화)
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
@@ -143,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const existing = localData.find(entry => entry.split(",")[0] === room);
                   if (existing && existing.split(",")[3] === "1") {
                     lastScannedText = "";
-                    showCustomAlert(`${room}号はすでに朝食を召し上がりました。\nThis room has already had breakfast.`);
+                    showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
                     return;
                   }
                   window.currentRoomText = room;
@@ -179,24 +231,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   };
 
                   // Save to localStorage
-                  const now = new Date();
-                  const yyyy = now.getFullYear();
-                  const mm = String(now.getMonth() + 1).padStart(2, '0');
-                  const dd = String(now.getDate()).padStart(2, '0');
-                  const hh = String(now.getHours()).padStart(2, '0');
-                  const min = String(now.getMinutes()).padStart(2, '0');
-                  const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-                  const newData = `${room},${parseInt(guests)},${formattedTime},0`;
-                  const index = localData.findIndex(entry => entry.split(",")[0] === room);
-                  if (index !== -1) {
-                    localData[index] = newData;
-                  } else {
-                    localData.push(newData);
-                  }
-                  localStorage.setItem("waitingList", JSON.stringify(localData));
+                  const formattedTime = getCurrentFormattedTime();
+                  updateLocalStorageEntry(room, guests, formattedTime, "0");
                 } else {
                   lastScannedText = "";
-                  showCustomAlert(`${room}号はRoom Onlyプランです。\nThis room is a Room Only plan.`);
+                  showCustomAlert(`${room}号は${messages.roomOnly.ja}\n${messages.roomOnly.en}`);
                 }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
@@ -205,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   restartQrScanner();
                 }, 300);
                 lastScannedText = "";
-                showCustomAlert("すみません、フロントでご確認ください。");
+                showCustomAlert(`${messages.confirmAtFront.ja}\n${messages.confirmAtFront.en}`);
               }
             })
             .catch(err => {
@@ -218,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           console.warn("🔴 QRコードのハッシュが一致しません（無効なQR）");
           lastScannedText = "";
-          showCustomAlert("QRコードが無効です。");
+          showCustomAlert(`${messages.invalidQR.ja}\n${messages.invalidQR.en}`);
         }
       });
     } else {
@@ -363,22 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Save to localStorage
-        const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const hh = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-        const newData = `${room},${parseInt(guests)},${formattedTime},0`;
-        const index = localData.findIndex(entry => entry.split(",")[0] === room);
-        if (index !== -1) {
-          localData[index] = newData;
-        } else {
-          localData.push(newData);
-        }
-        localStorage.setItem("waitingList", JSON.stringify(localData));
+        const formattedTime = getCurrentFormattedTime();
+        updateLocalStorageEntry(room, guests, formattedTime, "0");
 
         logDebug(`🟢 ${room}号 ${guests}名 を待機リストに追加または更新`);
       } else if (command === "2") {
@@ -398,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showCustomAlert(`${room}号 は待機リストに存在しません`);
         }
       } else {
-        showCustomAlert("不明なコマンドです。");
+      showCustomAlert("不明なコマンドです。");
       }
 
       // Clear input field after processing
@@ -430,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
         } else {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
-          showCustomAlert("QRコードが無効です。");
+          showCustomAlert(`${messages.invalidQR.ja}\n${messages.invalidQR.en}`);
         }
         // Clear input field after processing
         document.getElementById("qrResult").value = "";
@@ -495,11 +520,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window.submitGuestCount = function() {
     const guests = document.getElementById("guestCountInput").value;
     if (!guests) {
-      showCustomAlert("人数を入力してください。\nPlease enter the number of guests.");
+      showCustomAlert(`${messages.enterGuests.ja}\n${messages.enterGuests.en}`);
       return;
     }
     if (window.maxGuestsFromQR && parseInt(guests) > window.maxGuestsFromQR) {
-      showCustomAlert(`最大人数は${window.maxGuestsFromQR}名です。\nThe maximum number of guests is ${window.maxGuestsFromQR}.`);
+      showCustomAlert(`${messages.guestLimitExceeded(window.maxGuestsFromQR).ja}\n${messages.guestLimitExceeded(window.maxGuestsFromQR).en}`);
       return;
     }
 
@@ -547,26 +572,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- localStorage에 저장 ---
-    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-
-    const newData = `${text},${parseInt(guests)},${formattedTime},0`;
-
-    // 기존 항목이 있다면 업데이트
-    const index = localData.findIndex(entry => entry.split(",")[0] === text);
-    if (index !== -1) {
-      localData[index] = newData;
-    } else {
-      localData.push(newData);
-    }
-
-    localStorage.setItem("waitingList", JSON.stringify(localData));
+    const formattedTime = getCurrentFormattedTime();
+    updateLocalStorageEntry(text, guests, formattedTime, "0");
 
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
