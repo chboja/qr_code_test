@@ -418,8 +418,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("guestCountInput").value = "";
   };
 });
-// JSONP callback for breakfast_list POST
+
 window.handlePostResponse = function(response) {
+  console.log("📦 서버 응답:", response); // 콘솔에 출력
   if (response && response.success) {
     alert("記録が完了しました。");
   } else {
