@@ -33,11 +33,11 @@
   <!-- Custom modal input for guest count -->
   <div id="customPromptOverlay" style="display: none;">
     <div class="custom-prompt-box">
-      <p>朝食を取る人数を入力してください。</p>
+      <p>朝食を取る人数を入力してください。<br>Please enter the number of guests for breakfast.</p>
       <input type="text" id="guestCountInput" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" />
       <div class="custom-prompt-buttons">
-          <button onclick="closeCustomPrompt()">キャンセル</button>
-          <button onclick="submitGuestCount()">確定</button>
+          <button onclick="closeCustomPrompt()">キャンセル<br>Cancel</button>
+          <button onclick="submitGuestCount()">確定<br>Confirm</button>
       </div>
     </div>
   </div>
