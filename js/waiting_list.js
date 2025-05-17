@@ -84,7 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (parts.length === 7) {
       // Destructure in the correct order including guests
       const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
-      generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
+      // Only pass the required fields (excluding guests) to generateHash
+      generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           // 추가: 예약번호 서버 확인
           const loading = document.getElementById("loadingOverlay");
@@ -294,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (parts.length === 7) {
       // Destructure in the correct order including guests
       const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+      // Only pass the required fields (excluding guests) to generateHash
       generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           logDebug("🟢 QR코드 형식 및 해시 일치 → 검색 실행");
