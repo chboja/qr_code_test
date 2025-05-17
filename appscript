@@ -90,16 +90,19 @@ function doGet(e) {
       const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("breakfast_list");
       if (!sheet) throw new Error("breakfast_list not found");
 
+      Logger.log("🟡 데이터 입력 시도:", e.parameter);
       sheet.appendRow([e.parameter.timestamp, e.parameter.room, e.parameter.guests]);
+      Logger.log("🟢 appendRow 완료됨");
 
       const callback = e.parameter.callback || "handlePostResponse";
       return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: true })})`)
+        .createTextOutput(`${callback}(${JSON.stringify({ success: true, debug: { room: e.parameter.room, guests: e.parameter.guests, timestamp: e.parameter.timestamp } })})`)
         .setMimeType(ContentService.MimeType.JAVASCRIPT);
     } catch (err) {
+      Logger.log("❌ appendRow 에러:", err);
       const callback = e.parameter.callback || "handlePostResponse";
       return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: err.message })})`)
+        .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: err.message, debug: { room: e.parameter.room, guests: e.parameter.guests, timestamp: e.parameter.timestamp } })})`)
         .setMimeType(ContentService.MimeType.JAVASCRIPT);
     }
   }

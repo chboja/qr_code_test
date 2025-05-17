@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwp_aNEv1lc2CWHVW69BCNLiMm2ldSKZc4eyN1D5P5TlmCJVAhfy2aYoBrs2IpqNiuY2w/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbzqC05DHC4AiZc1dTDDxy1yKkgfJN1nMrDZVj9cMitOYB8jz8erPhI5QfZw8K_TxU6QNw/exec";
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
