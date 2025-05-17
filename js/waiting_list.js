@@ -129,6 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
+        // Show confirmation modal before disabling the button
+        showCustomAlert(`${roomNum}号 ${guests}名\n入場を確認しました。\nEntry confirmed.`);
         // 버튼 비활성화 및 제거
         button.disabled = true;
         button.style.opacity = "0.5";
