@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listContainer.appendChild(button);
   });
 
-  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbx8HYQCQ5XK0JigORX-H82_o373_I8QmOWojVIXvOz5rbP7_MRSz-4mZ8i_npP8h-XMPg/exec";
+  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbzColUcTtVLVSFPvIRwFb6JkRJfevJgZ9tNM-YS_sO-rn4L4Cae8P8GxhZI_ynk0-wt_w/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
   const html5QrCode = new Html5Qrcode(qrRegionId);

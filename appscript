@@ -66,22 +66,19 @@ function doGet(e) {
     }
   }
 
-  if (e.parameter.verifyReservation && e.parameter.hashcode) {
+  if (e.parameter.verifyReservation) {
     const reservationToVerify = e.parameter.verifyReservation.trim();
-    const hashToVerify = e.parameter.hashcode.trim();
     const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("guest_list");
     if (!sheet) throw new Error("guest_list not found");
 
     const data = sheet.getDataRange().getValues();
     const match = data.find((row, index) => index !== 0 && String(row[0]).trim() === reservationToVerify);
-    const storedHash = match ? String(match[8]).trim() : null;
     const breakfastFlag = match ? String(match[6]) : null;
 
-    const isMatch = storedHash === hashToVerify;
     return ContentService
       .createTextOutput(`${e.parameter.callback}(${JSON.stringify({
         success: true,
-        match: isMatch,
+        exists: !!match,
         breakfastFlag
       })})`)
       .setMimeType(ContentService.MimeType.JAVASCRIPT);
