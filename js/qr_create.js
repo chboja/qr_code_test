@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
       const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
-      const qrText = `${room},${checkIn},${checkOut},${breakfastFlag},${guests},${reservation},${hash}`;
+      const qrText = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag},${hash}`;
 
       // ✅ 팝업 티켓 정보 표시
       const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}<br>Booking No : ${reservation}`;
