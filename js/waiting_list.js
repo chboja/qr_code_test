@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                   window.currentRoomText = room;
                   window.maxGuestsFromQR = parseInt(guests);
+                  document.getElementById("guestCountInput").value = guests;
                   document.getElementById("customPromptOverlay").style.display = "flex";
                   // Set prompt message in Japanese and English (2 lines)
                   var promptLabel = document.getElementById("customPromptLabel");
@@ -584,8 +585,10 @@ window.handlePostResponse = function(response) {
   console.log("📦 서버 응답:", response); // 콘솔에 출력
   if (response && response.success) {
     alert("記録が完了しました。");
+    restartQrScanner();
   } else {
     alert("記録中にエラーが発生しました。");
     console.error("記録エラー:", response);
+    restartQrScanner();
   }
 };
