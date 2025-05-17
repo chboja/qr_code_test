@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwOFUuxlwt90WSf_t4JHcJsWh8t7bmkcKddSkbvfVaeHayiNsgAE7lCdXHCd5wzP1zS9Q/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
   const html5QrCode = new Html5Qrcode(qrRegionId);
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           // 추가: 예약번호 서버 확인
-          fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?verifyReservation=${reservation}&hashcode=${hashFromQR}&callback=verifyCallback`)
+          fetch(`${SCRIPT_BASE_URL}?verifyReservation=${reservation}&callback=verifyCallback`)
             .then(response => response.text())
             .then(text => {
               const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
