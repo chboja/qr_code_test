@@ -1,5 +1,26 @@
 const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbz8gAPzSSjqgmXgWYqZJb4HAf2A7Bt3j70FKngVsiJ7yrGiGAND9QH61iSBdOu7qMDeYw/exec";
 document.addEventListener("DOMContentLoaded", () => {
+  // Prevent duplicate scans of the same QR code
+  let lastScannedText = "";
+  // --- Reusable QR scanner restart function ---
+  function restartQrScanner() {
+    html5QrCode.stop().then(() => {
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      );
+    }).catch(err => {
+      console.error("QRスキャナ再起動エラー:", err);
+    });
+  }
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
   const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
@@ -73,7 +94,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const html5QrCode = new Html5Qrcode(qrRegionId);
 
   function onScanSuccess(decodedText, decodedResult) {
-    html5QrCode.pause(); // 중복 스캔 방지
+    if (decodedText === lastScannedText) {
+      return; // Prevent duplicate scans of the same QR code
+    }
+    lastScannedText = decodedText;
+    // html5QrCode.pause(); // 중복 스캔 방지 (비활성화)
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
@@ -237,20 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!text) {
       alert("QRコードをスキャンしてください。");
       // Restart QR scanner after search attempt
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("検索後にQRスキャナ再起動エラー:", err);
-      });
+      restartQrScanner();
       return;
     }
 
@@ -268,20 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
           alert(display);
         }
         // Restart QR scanner after search attempt
-        html5QrCode.start(
-          { facingMode: "user" },
-          {
-            fps: 10,
-            qrbox: function(viewfinderWidth, viewfinderHeight) {
-              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-              const boxSize = Math.floor(minEdge * 0.7);
-              return { width: boxSize, height: boxSize };
-            }
-          },
-          onScanSuccess
-        ).catch(err => {
-          console.error("検索後にQRスキャナ再起動エラー:", err);
-        });
+        restartQrScanner();
         return;
       }
 
@@ -299,20 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!room || !guests) {
           alert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
           // Restart QR scanner after search attempt
-          html5QrCode.start(
-            { facingMode: "user" },
-            {
-              fps: 10,
-              qrbox: function(viewfinderWidth, viewfinderHeight) {
-                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                const boxSize = Math.floor(minEdge * 0.7);
-                return { width: boxSize, height: boxSize };
-              }
-            },
-            onScanSuccess
-          ).catch(err => {
-            console.error("検索後にQRスキャナ再起動エラー:", err);
-          });
+          restartQrScanner();
           return;
         }
 
@@ -375,20 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!room) {
           alert("キャンセルには部屋番号が必要です（例: #2,501）");
           // Restart QR scanner after search attempt
-          html5QrCode.start(
-            { facingMode: "user" },
-            {
-              fps: 10,
-              qrbox: function(viewfinderWidth, viewfinderHeight) {
-                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                const boxSize = Math.floor(minEdge * 0.7);
-                return { width: boxSize, height: boxSize };
-              }
-            },
-            onScanSuccess
-          ).catch(err => {
-            console.error("検索後にQRスキャナ再起動エラー:", err);
-          });
+          restartQrScanner();
           return;
         }
 
@@ -404,20 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("検索後にQRスキャナ再起動エラー:", err);
-      });
+      restartQrScanner();
       return;
     }
 
@@ -446,39 +406,13 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("QRコードが無効です。");
         }
         // Restart QR scanner after search attempt
-        html5QrCode.start(
-          { facingMode: "user" },
-          {
-            fps: 10,
-            qrbox: function(viewfinderWidth, viewfinderHeight) {
-              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-              const boxSize = Math.floor(minEdge * 0.7);
-              return { width: boxSize, height: boxSize };
-            }
-          },
-          onScanSuccess
-        ).catch(err => {
-          console.error("検索後にQRスキャナ再起動エラー:", err);
-        });
+        restartQrScanner();
       });
     } else {
       logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
       alert("QRコードの形式が正しくありません。");
       // Restart QR scanner after search attempt
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("検索後にQRスキャナ再起動エラー:", err);
-      });
+      restartQrScanner();
     }
   });
 
@@ -599,41 +533,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("customPromptOverlay").style.display = "none";
 
     // Restart QR scanner after submitting guest count
-    html5QrCode.start(
-      { facingMode: "user" },
-      {
-        fps: 10,
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
-          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-          const boxSize = Math.floor(minEdge * 0.7);
-          return { width: boxSize, height: boxSize };
-        }
-      },
-      onScanSuccess
-    ).catch(err => {
-      console.error("カメラ再起動エラー:", err);
-    });
+    restartQrScanner();
   };
 
   window.closeCustomPrompt = function() {
     document.getElementById("customPromptOverlay").style.display = "none";
     document.getElementById("guestCountInput").value = "";
-    html5QrCode.stop().then(() => {
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      );
-    }).catch(err => {
-      console.error("再起動エラー:", err);
-    });
+    restartQrScanner();
   };
 
   // 팝업 외부 터치 시 닫기 (cancel 동작 실행)
