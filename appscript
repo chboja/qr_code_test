@@ -1,162 +1,136 @@
+const SHEET_ID = "1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ";
+
+function jsonpResponse(callback, payload) {
+  return ContentService
+    .createTextOutput(`${callback}(${JSON.stringify(payload)})`)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
 function doGet(e) {
-  // Handle breakfast_list POST explicitly by mode parameter
-  if (e.parameter.mode === "breakfastSubmit") {
-    try {
-      const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("breakfast_list");
-      if (!sheet) throw new Error("breakfast_list not found");
+  const mode = e.parameter.mode;
+  const callback = e.parameter.callback || "handlePostResponse";
 
-      Logger.log("🟡 조식 데이터 기록 시도:", e.parameter);
-      sheet.appendRow([e.parameter.timestamp, e.parameter.room, e.parameter.guests]);
-      Logger.log("🟢 appendRow 완료");
-
-      const callback = e.parameter.callback || "handlePostResponse";
-      return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: true })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } catch (err) {
-      Logger.log("❌ 조식 기록 에러:", err);
-      const callback = e.parameter.callback || "handlePostResponse";
-      return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: err.message })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
+  switch (mode) {
+    case "breakfastSubmit":
+      return handleBreakfastSubmit(e, callback);
+    case "verifyReservation":
+      return handleVerifyReservation(e, callback);
+    case "searchName":
+      return handleSearchByName(e, callback);
+    case "searchRoom":
+      return handleSearchByRoom(e, callback);
+    case "importCsv":
+      return handleImportCsv(e, callback);
+    default:
+      return handleDefault(e, callback);
   }
-  const searchName = e.parameter.name;
-  const searchRoom = e.parameter.room;
-  if (searchName) {
-    try {
-      const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("guest_list");
-      if (!sheet) throw new Error("guest_list not found");
+}
 
-      const data = sheet.getDataRange().getValues();
-      const searchKey = searchName.toLowerCase().replace(/\s+/g, '');
-      const matches = data.filter((row, index) => {
-        if (index === 0) return false; // skip header
-        const rowKey = (row[7] || "").toLowerCase().replace(/\s+/g, '');
-        return rowKey.includes(searchKey);
-      }).map(row => ({
-        reservation: row[0],
-        room: row[1],
-        name: row[2],
-        checkIn: row[3],
-        checkOut: row[4],
-        guestCount: row[5],
-        breakfastFlag: row[6],
-        unpaid: row[9],     
-        memo: row[10] 
-      }));
-
-      return ContentService
-        .createTextOutput(`${e.parameter.callback}(${JSON.stringify({ success: true, matches })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } catch (err) {
-      return ContentService
-        .createTextOutput(`${e.parameter.callback}(${JSON.stringify({ success: false, error: err.message })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
+function handleBreakfastSubmit(e, callback) {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("breakfast_list");
+    if (!sheet) throw new Error("breakfast_list not found");
+    Logger.log("🟡 조식 데이터 기록 시도:", e.parameter);
+    sheet.appendRow([e.parameter.timestamp, e.parameter.room, e.parameter.guests]);
+    Logger.log("🟢 appendRow 완료");
+    return jsonpResponse(callback, { success: true });
+  } catch (err) {
+    Logger.log("❌ 조식 기록 에러:", err);
+    return jsonpResponse(callback, { success: false, error: err.message });
   }
-  if (searchRoom) {
-    try {
-      const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("guest_list");
-      if (!sheet) throw new Error("guest_list not found");
+}
 
-      const data = sheet.getDataRange().getValues();
-      const searchKey = searchRoom.toLowerCase().replace(/\s+/g, '');
-      const matches = data.filter((row, index) => {
-        if (index === 0) return false; // skip header
-        const rowKey = String(row[1] || "").toLowerCase().replace(/\s+/g, '');
-        return rowKey.includes(searchKey);
-      }).map(row => ({
-        reservation: row[0],
-        room: row[1],
-        name: row[2],
-        checkIn: row[3],
-        checkOut: row[4],
-        guestCount: row[5],
-        breakfastFlag: row[6],
-        unpaid: row[9],
-        memo: row[10] 
-      }));
-
-      return ContentService
-        .createTextOutput(`${e.parameter.callback}(${JSON.stringify({ success: true, matches })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } catch (err) {
-      return ContentService
-        .createTextOutput(`${e.parameter.callback}(${JSON.stringify({ success: false, error: err.message })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-  }
-
-  if (e.parameter.verifyReservation) {
-    const reservationToVerify = e.parameter.verifyReservation.trim();
-    const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("guest_list");
+function handleVerifyReservation(e, callback) {
+  try {
+    const reservationToVerify = e.parameter.verifyReservation.trim().toLowerCase();
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
     if (!sheet) throw new Error("guest_list not found");
-
     const data = sheet.getDataRange().getValues();
-    const match = data.find((row, index) => index !== 0 && String(row[0]).trim() === reservationToVerify);
+    const match = data.find((row, index) =>
+      index !== 0 && String(row[0]).trim().toLowerCase() === reservationToVerify
+    );
     const breakfastFlag = match ? String(match[6]) : null;
-
-    return ContentService
-      .createTextOutput(`${e.parameter.callback}(${JSON.stringify({
-        success: true,
-        exists: !!match,
-        breakfastFlag
-      })})`)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    return jsonpResponse(callback, {
+      success: true,
+      exists: !!match,
+      breakfastFlag
+    });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
   }
+}
 
-  // Handle breakfast_list POST (room, guests, timestamp)
-  if (e.parameter.room && e.parameter.guests && e.parameter.timestamp) {
-    try {
-      const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("breakfast_list");
-      if (!sheet) throw new Error("breakfast_list not found");
-
-      Logger.log("🟡 데이터 입력 시도:", e.parameter);
-      sheet.appendRow([e.parameter.timestamp, e.parameter.room, e.parameter.guests]);
-      Logger.log("🟢 appendRow 완료됨");
-
-      const callback = e.parameter.callback || "handlePostResponse";
-      return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: true, debug: { room: e.parameter.room, guests: e.parameter.guests, timestamp: e.parameter.timestamp } })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } catch (err) {
-      Logger.log("❌ appendRow 에러:", err);
-      const callback = e.parameter.callback || "handlePostResponse";
-      return ContentService
-        .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: err.message, debug: { room: e.parameter.room, guests: e.parameter.guests, timestamp: e.parameter.timestamp } })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
+function handleSearchByName(e, callback) {
+  try {
+    const searchKey = e.parameter.name.toLowerCase().replace(/\s+/g, '');
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
+    if (!sheet) throw new Error("guest_list not found");
+    const data = sheet.getDataRange().getValues();
+    const matches = data.filter((row, index) => {
+      if (index === 0) return false;
+      const rowKey = (row[7] || "").toLowerCase().replace(/\s+/g, '');
+      return rowKey.includes(searchKey);
+    }).map(row => ({
+      reservation: row[0],
+      room: row[1],
+      name: row[2],
+      checkIn: row[3],
+      checkOut: row[4],
+      guestCount: row[5],
+      breakfastFlag: row[6],
+      unpaid: row[9],
+      memo: row[10]
+    }));
+    return jsonpResponse(callback, { success: true, matches });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
   }
+}
 
-  const callback = e.parameter.callback;
+function handleSearchByRoom(e, callback) {
+  try {
+    const searchKey = e.parameter.room.toLowerCase().replace(/\s+/g, '');
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
+    if (!sheet) throw new Error("guest_list not found");
+    const data = sheet.getDataRange().getValues();
+    const matches = data.filter((row, index) => {
+      if (index === 0) return false;
+      const rowKey = String(row[1] || "").toLowerCase().replace(/\s+/g, '');
+      return rowKey.includes(searchKey);
+    }).map(row => ({
+      reservation: row[0],
+      room: row[1],
+      name: row[2],
+      checkIn: row[3],
+      checkOut: row[4],
+      guestCount: row[5],
+      breakfastFlag: row[6],
+      unpaid: row[9],
+      memo: row[10]
+    }));
+    return jsonpResponse(callback, { success: true, matches });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
+  }
+}
+
+function handleImportCsv(e, callback) {
   const csvData = e.parameter.csv;
-
-  if (!callback) {
-    return ContentService
-      .createTextOutput(`(${JSON.stringify({ success: false, error: "Missing callback parameter" })})`)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-
   const command = e.parameter.command;
+
   if (command !== "clear" && !csvData) {
-    return ContentService
-      .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: "Missing csv parameter" })})`)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    return jsonpResponse(callback, { success: false, error: "Missing csv parameter" });
   }
 
   try {
-    const sheet = SpreadsheetApp.openById("1p1tktgK4vo9Yyc_dC1NB5WL-m2HNS_R6vYZAWWJSMXQ").getSheetByName("guest_list");
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
     if (!sheet) throw new Error("guest_list not found");
 
     if (command === "clear") {
       if (sheet.getLastRow() > 1) {
         sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
       }
-
-      return ContentService
-        .createTextOutput(`${e.parameter.callback}(${JSON.stringify({ success: true, cleared: true })})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      return jsonpResponse(callback, { success: true, cleared: true });
     }
 
     const rows = csvData.trim().split(';').map(line => {
@@ -164,17 +138,13 @@ function doGet(e) {
       return [reservation, room, name, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash, unpaid, memo];
     });
 
-    const augmentedRows = rows;
-
-    sheet.getRange(sheet.getLastRow() + 1, 1, augmentedRows.length, augmentedRows[0].length).setValues(augmentedRows);
-
-    return ContentService
-      .createTextOutput(`${callback}(${JSON.stringify({ success: true, inserted: augmentedRows.length })})`)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-
+    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+    return jsonpResponse(callback, { success: true, inserted: rows.length });
   } catch (err) {
-    return ContentService
-      .createTextOutput(`${callback}(${JSON.stringify({ success: false, error: err.message })})`)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    return jsonpResponse(callback, { success: false, error: err.message });
   }
+}
+
+function handleDefault(e, callback) {
+  return jsonpResponse(callback, { success: false, error: "Invalid mode or missing parameters" });
 }
