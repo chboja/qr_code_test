@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loadingOverlay").style.display = "none";
   const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwOFUuxlwt90WSf_t4JHcJsWh8t7bmkcKddSkbvfVaeHayiNsgAE7lCdXHCd5wzP1zS9Q/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
@@ -16,11 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
       generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           // 추가: 예약번호 서버 확인
-          document.getElementById("loadingOverlay").style.display = "flex";
+          const loading = document.getElementById("loadingOverlay");
+          if (loading) loading.style.display = "flex";
           fetch(`${SCRIPT_BASE_URL}?verifyReservation=${reservation}&callback=verifyCallback`)
             .then(response => response.text())
             .then(text => {
-              document.getElementById("loadingOverlay").style.display = "none";
+              const loading = document.getElementById("loadingOverlay");
+              if (loading) loading.style.display = "none";
               const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
               const result = JSON.parse(jsonText);
               if (result.success && result.exists) {
@@ -37,7 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             })
             .catch(err => {
-              document.getElementById("loadingOverlay").style.display = "none";
+              const loading = document.getElementById("loadingOverlay");
+              if (loading) loading.style.display = "none";
               console.error("🔴 예약번호 확인 중 오류 발생", err);
               alert("予約番号の確認中にエラーが発生しました。");
             });
