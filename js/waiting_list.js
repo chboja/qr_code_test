@@ -32,12 +32,40 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   waitingList.forEach(entry => {
-    const [room, guests] = entry.split(",");
+    const [room, guests, timestamp] = entry.split(",");
     const button = document.createElement("button");
     button.classList.add("dynamic-button");
     button.textContent = `${room}号 ${guests}名`;
     button.onclick = () => {
-      alert(`"${room}" (${guests}名) ボタンがクリックされました`);
+      const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+      const index = localData.findIndex(entry => entry.split(",")[0] === room);
+      if (index !== -1) {
+        const [roomNum, guests, timestamp] = localData[index].split(",");
+        const updatedEntry = `${roomNum},${guests},${timestamp},1`;
+        localData[index] = updatedEntry;
+        localStorage.setItem("waitingList", JSON.stringify(localData));
+
+        // Send to Google Apps Script
+        fetch(SCRIPT_BASE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            room: roomNum,
+            guests: guests,
+            timestamp: timestamp
+          })
+        })
+        .then(response => response.text())
+        .then(result => {
+          alert(`${roomNum}号 ${guests}名 を記録しました`);
+        })
+        .catch(err => {
+          alert("送信中にエラーが発生しました。");
+          console.error("送信エラー:", err);
+        });
+      }
     };
     listContainer.appendChild(button);
   });
@@ -70,13 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
               const result = JSON.parse(jsonText);
               if (result.success && result.exists) {
                 if (breakfastFlag === "1") {
+                  // Check if room already exists in localStorage with status "1"
+                  const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+                  const existing = localData.find(entry => entry.split(",")[0] === room);
+                  if (existing && existing.split(",")[3] === "1") {
+                    alert(`${room}号はすでに朝食を召し上がりました。`);
+                    return;
+                  }
                   window.currentRoomText = room;
                   window.maxGuestsFromQR = parseInt(guests);
                   document.getElementById("customPromptOverlay").style.display = "flex";
                   document.getElementById("guestCountInput").focus();
 
                   // Save to localStorage
-                  const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
                   const now = new Date();
                   const yyyy = now.getFullYear();
                   const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -85,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const min = String(now.getMinutes()).padStart(2, '0');
                   const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
                   const newData = `${room},${parseInt(guests)},${formattedTime},0`;
-                  const index = localData.findIndex(entry => entry.startsWith(`${room},`));
+                  const index = localData.findIndex(entry => entry.split(",")[0] === room);
                   if (index !== -1) {
                     localData[index] = newData;
                   } else {
@@ -227,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const min = String(now.getMinutes()).padStart(2, '0');
         const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
         const newData = `${room},${parseInt(guests)},${formattedTime},0`;
-        const index = localData.findIndex(entry => entry.startsWith(`${room},`));
+        const index = localData.findIndex(entry => entry.split(",")[0] === room);
         if (index !== -1) {
           localData[index] = newData;
         } else {
@@ -355,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const newData = `${text},${parseInt(guests)},${formattedTime},0`;
 
     // 기존 항목이 있다면 업데이트
-    const index = localData.findIndex(entry => entry.startsWith(`${text},`));
+    const index = localData.findIndex(entry => entry.split(",")[0] === text);
     if (index !== -1) {
       localData[index] = newData;
     } else {
