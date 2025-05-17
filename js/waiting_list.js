@@ -61,6 +61,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let count = 1;
 
+  // Debug log 출력용
+  function logDebug(msg) {
+    const logBox = document.getElementById("debugLog");
+    if (logBox) {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement("div");
+      entry.textContent = `[${time}] ${msg}`;
+      logBox.prepend(entry);
+    }
+  }
+
   const submitBtn = document.getElementById("searchButton");
   submitBtn.addEventListener("click", () => {
     const text = document.getElementById("qrResult").value.trim();
@@ -69,8 +80,28 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    window.currentRoomText = text; // store room info globally
-    document.getElementById("customPromptOverlay").style.display = "flex"; // show modal
+    if (text.startsWith("#")) {
+      logDebug("✅ '#'로 시작하는 수동 명령어 입력됨 → 검색 허용");
+      window.currentRoomText = text;
+      document.getElementById("customPromptOverlay").style.display = "flex";
+      return;
+    }
+
+    const parts = text.split(",");
+    if (parts.length === 6) {
+      const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
+      generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
+        if (calculatedHash === hashFromQR) {
+          logDebug("🟢 QR코드 형식 및 해시 일치 → 검색 실행");
+          window.currentRoomText = text;
+          document.getElementById("customPromptOverlay").style.display = "flex";
+        } else {
+          logDebug("❌ QR코드 해시 불일치 → 검색 차단");
+        }
+      });
+    } else {
+      logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
+    }
   });
 
   // ✅ Enter, Return, Go, Done, Next 키 입력 시 검색 버튼 클릭 실행 (iPad/iOS 키보드 대응)
