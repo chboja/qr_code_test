@@ -1,10 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
+  const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  // Remove entries not from today
+  const todayList = savedList.filter(entry => entry.split(",")[2].slice(0, 10) === today);
+  localStorage.setItem("waitingList", JSON.stringify(todayList));
   const listContainer = document.getElementById("List");
 
-  // Only display waiting entries (where last field is "0"), sorted by timestamp
-  const waitingList = savedList.filter(entry => entry.split(",")[3] === "0");
+  const waitingList = todayList.filter(entry => {
+    const parts = entry.split(",");
+    const [room, guests, timestamp, status] = parts;
+    const entryDate = timestamp.slice(0, 10);
+    const entryHour = parseInt(timestamp.slice(11, 13));
+    return (
+      status === "0" &&
+      entryDate === today &&
+      entryHour >= 6 &&
+      entryHour < 11
+    );
+  });
+
   waitingList.sort((a, b) => {
     const timeA = new Date(a.split(",")[2]);
     const timeB = new Date(b.split(",")[2]);
@@ -53,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   window.currentRoomText = room;
                   window.maxGuestsFromQR = parseInt(guests);
                   document.getElementById("customPromptOverlay").style.display = "flex";
+                  document.getElementById("guestCountInput").focus();
 
                   // Save to localStorage
                   const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
@@ -153,6 +169,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (text.startsWith("#")) {
+      if (text === "#0") {
+        const allData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+        if (allData.length === 0) {
+          alert("ローカルストレージにデータがありません。");
+        } else {
+          const display = allData.map(entry => {
+            const [room, guests, timestamp, status] = entry.split(",");
+            const statusText = status === "1" ? "入場" : "待機";
+            return `${room}号 ${guests}名 ${timestamp} (${statusText})`;
+          }).join("\n");
+          alert(display);
+        }
+        return;
+      }
+
       const parts = text.substring(1).split(",");
       const command = parts[0];
       const room = parts[1];

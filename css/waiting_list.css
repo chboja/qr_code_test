@@ -1,4 +1,4 @@
-html, body {
+<html, body {
   margin: 0;
   padding: 0;
   height: 95vh; /* reduced from 100vh */
@@ -73,11 +73,6 @@ body {
 .list-section h2 {
   margin-bottom: 10px;
 }
-
-.qr-title {
-  margin-bottom: 75px;
-}
-
 
 #waiting-list {
   margin-top: 20px;
