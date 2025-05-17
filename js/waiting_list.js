@@ -364,6 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("🔍 検索ボタンを実行します");
       e.preventDefault();
       document.getElementById("searchButton").click();
+      document.activeElement.blur(); // 키보드 닫기
     }
   });
 
@@ -473,6 +474,20 @@ document.addEventListener("DOMContentLoaded", () => {
   window.closeCustomPrompt = function() {
     document.getElementById("customPromptOverlay").style.display = "none";
     document.getElementById("guestCountInput").value = "";
+    html5QrCode.start(
+      { facingMode: "user" },
+      {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const boxSize = Math.floor(minEdge * 0.7);
+          return { width: boxSize, height: boxSize };
+        }
+      },
+      onScanSuccess
+    ).catch(err => {
+      console.error("再起動エラー:", err);
+    });
   };
 });
 
