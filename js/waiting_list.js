@@ -1,5 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
+  const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
+  const listContainer = document.getElementById("List");
+
+  // Only display waiting entries (where last field is "0"), sorted by timestamp
+  const waitingList = savedList.filter(entry => entry.split(",")[3] === "0");
+  waitingList.sort((a, b) => {
+    const timeA = new Date(a.split(",")[2]);
+    const timeB = new Date(b.split(",")[2]);
+    return timeA - timeB;
+  });
+
+  waitingList.forEach(entry => {
+    const [room, guests] = entry.split(",");
+    const button = document.createElement("button");
+    button.classList.add("dynamic-button");
+    button.textContent = `${room}号 ${guests}名`;
+    button.onclick = () => {
+      alert(`"${room}" (${guests}名) ボタンがクリックされました`);
+    };
+    listContainer.appendChild(button);
+  });
+
   const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwOFUuxlwt90WSf_t4JHcJsWh8t7bmkcKddSkbvfVaeHayiNsgAE7lCdXHCd5wzP1zS9Q/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
@@ -41,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const hh = String(now.getHours()).padStart(2, '0');
                   const min = String(now.getMinutes()).padStart(2, '0');
                   const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-                  const newData = `${room},${parseInt(guests)},${formattedTime}`;
+                  const newData = `${room},${parseInt(guests)},${formattedTime},0`;
                   const index = localData.findIndex(entry => entry.startsWith(`${room},`));
                   if (index !== -1) {
                     localData[index] = newData;
@@ -168,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const hh = String(now.getHours()).padStart(2, '0');
         const min = String(now.getMinutes()).padStart(2, '0');
         const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-        const newData = `${room},${parseInt(guests)},${formattedTime}`;
+        const newData = `${room},${parseInt(guests)},${formattedTime},0`;
         const index = localData.findIndex(entry => entry.startsWith(`${room},`));
         if (index !== -1) {
           localData[index] = newData;
@@ -294,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const min = String(now.getMinutes()).padStart(2, '0');
     const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 
-    const newData = `${text},${parseInt(guests)},${formattedTime}`;
+    const newData = `${text},${parseInt(guests)},${formattedTime},0`;
 
     // 기존 항목이 있다면 업데이트
     const index = localData.findIndex(entry => entry.startsWith(`${text},`));
