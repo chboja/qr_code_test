@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
+
         // Send to Google Apps Script via JSONP
         const jsonpScript = document.createElement("script");
         jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
