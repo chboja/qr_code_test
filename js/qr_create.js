@@ -309,8 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
     popupQR.innerHTML = "";
     new QRCode(popupQR, {
       text: qrText,
-      width: 160,
-      height: 160,
+      width: 220,
+      height: 220,
       correctLevel: QRCode.CorrectLevel.H
     });
     document.getElementById("qrOverlay").style.display = "flex";

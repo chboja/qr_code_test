@@ -86,8 +86,8 @@ body {
   }
   
   #qrResult canvas {
-    width: 120px !important;
-    height: 120px !important;
+    width: 200px !important;
+    height: 200px !important;
   }
 .inline-buttons {
   display: flex;
@@ -174,10 +174,12 @@ body {
 
 .popup {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
+  padding: 40px;
+  border-radius: 16px;
   text-align: center;
   box-shadow: 0 0 15px rgba(255,255,255,0.3);
+  max-width: 90vw;
+  font-size: 18px;
 }
 
 /* Center the popupQR content horizontally */
