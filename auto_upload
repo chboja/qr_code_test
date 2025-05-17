@@ -1,0 +1,156 @@
+import tkinter as tk
+from tkinter import messagebox
+import threading
+
+# "작업 중" 윈도우를 띄우는 함수
+def show_working_window():
+    root = tk.Tk()
+    root.title("처리 중")
+    root.geometry("300x100")
+    label = tk.Label(root, text="고객 정보 갱신 중...", font=("Arial", 14))
+    label.pack(expand=True)
+    root.attributes('-topmost', True)
+    # return root so we can destroy it later
+    return root
+
+# 팝업 메시지 함수 정의
+def show_message(title, message):
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showinfo(title, message)
+    root.destroy()
+import pandas as pd
+import hashlib
+import re
+import jaconv
+
+csv_file_path = "reservation_2025-05-16.csv"
+
+secret = "HOTEL_ONLY_SECRET_KEY"
+
+def generate_hash(room, check_in, check_out, reservation, breakfast_flag):
+    data = f"{room},{check_in},{check_out},{reservation},{breakfast_flag}"
+    return hashlib.sha256((data + secret).encode("utf-8")).hexdigest()[:8]
+
+def format_date(raw):
+    try:
+        dt = pd.to_datetime(raw)
+        return dt.strftime("%Y-%m-%d")
+    except:
+        return ""
+
+def normalize_search_name(name):
+    name = str(name).strip()
+    if re.match(r'^[\x00-\x7F\s]+$', name):
+        return name.lower()
+    return jaconv.hira2kata(jaconv.z2h(name, kana=True, digit=False, ascii=False))
+
+df = pd.read_csv(csv_file_path, encoding="cp932")
+
+rows = []
+for _, row in df.iterrows():
+    if str(row.get("ステータス", "")).strip() == "キャンセル":
+        continue
+
+    reservation = str(row.get("#予約番号", "")).strip()
+    raw_room = str(row.get("部屋名", "")).strip()
+    room_match = re.search(r"\d{1,3}", raw_room)
+    room = room_match.group(0) if room_match else raw_room
+
+    name = str(row.get("予約者", "")).strip()
+    check_in = format_date(row.get("C/I", ""))
+    check_out = format_date(row.get("C/O", ""))
+    guests = str(row.get("大人人数", "")).strip()
+    plan = str(row.get("プラン名", "")).lower()
+
+    breakfast_flag = "0" if "room only" in plan else "1"
+    hashcode = generate_hash(room, check_in, check_out, reservation, breakfast_flag)
+    search_name = normalize_search_name(name)
+
+    unpaid_raw = str(row.get("未収金", "")).strip()
+    unpaid = "0" if unpaid_raw == "なし" else unpaid_raw.replace(",", "、")
+
+    memo = str(row.get("メモ", "")).strip().replace(",", "、")
+
+    csv_line = ",".join([
+        reservation,
+        room,
+        name,
+        check_in,
+        check_out,
+        guests,
+        breakfast_flag,
+        search_name,
+        hashcode,
+        unpaid,
+        memo
+    ])
+    rows.append(csv_line)
+
+# GAS로 보낼 전체 문자열 (세미콜론으로 구분)
+final_payload = ";".join(rows)
+# print(final_payload)  # EXE에서는 출력하지 않음
+
+
+import requests
+
+GAS_URL = "https://script.google.com/macros/s/AKfycbz8gAPzSSjqgmXgWYqZJb4HAf2A7Bt3j70FKngVsiJ7yrGiGAND9QH61iSBdOu7qMDeYw/exec"
+
+# "작업 중" 윈도우 관리 변수
+working_root = None
+def _start_working_window():
+    global working_root
+    working_root = show_working_window()
+    working_root.mainloop()
+
+# 1. Clear existing sheet data
+clear_response = requests.get(GAS_URL, params={"command": "clear"})
+show_message("초기화 완료", f"🧹 시트 초기화 결과: {clear_response.json()}")
+
+# 업로드 시작 안내 및 "작업 중" 윈도우 띄우기
+working_thread = threading.Thread(target=_start_working_window)
+working_thread.daemon = True
+working_thread.start()
+
+show_message("업로드 시작", "구글시트 업로드를 시작합니다...")
+# 2. Upload new data via POST
+upload_response = requests.post(GAS_URL, data={"csv": final_payload})
+# print("📤 POST 방식 업로드 결과:", upload_response.json())
+
+# ✅ 업로드 결과에 따라 종료 여부 판단
+import sys
+
+def close_working_window():
+    global working_root
+    if working_root is not None:
+        try:
+            working_root.destroy()
+        except Exception:
+            pass
+        working_root = None
+
+if upload_response.ok:
+    result = upload_response.json()
+    if result.get("success"):
+        close_working_window()
+        show_message("성공", "✅ 구글시트 업로드 완료!")
+        sys.exit(0)
+    else:
+        close_working_window()
+        show_message("업로드 실패", f"❌ 오류: {result}")
+        sys.exit(1)
+else:
+    close_working_window()
+    show_message("요청 실패", f"❌ 상태 코드: {upload_response.status_code}")
+    sys.exit(1)
+
+# 3. (선택) GET 방식으로 업로드 예시 (데이터가 짧을 경우에만)
+# 참고: URL 길이 제한 (~2000자)로 인해 많은 데이터에는 적합하지 않음
+# import urllib.parse
+#
+# if len(final_payload) < 1800:
+#     get_url = f"{GAS_URL}?csv={urllib.parse.quote(final_payload)}"
+#     get_upload_response = requests.get(get_url)
+#     print("📤 GET 방식 업로드 결과:", get_upload_response.json())
+# else:
+#     print("⚠️ GET 방식은 데이터가 너무 길어서 생략됨 (길이:", len(final_payload), ")")

@@ -148,3 +148,26 @@ function handleImportCsv(e, callback) {
 function handleDefault(e, callback) {
   return jsonpResponse(callback, { success: false, error: "Invalid mode or missing parameters" });
 }
+function doPost(e) {
+  const csvRaw = e.postData.contents;
+  const callback = "handlePostResponse";
+
+  if (!csvRaw) {
+    return jsonpResponse(callback, { success: false, error: "No CSV data in POST" });
+  }
+
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
+    if (!sheet) throw new Error("guest_list not found");
+
+    const rows = csvRaw.trim().split(';').map(line => {
+      const [reservation, room, name, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash, unpaid, memo] = line.split(',');
+      return [reservation, room, name, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash, unpaid, memo];
+    });
+
+    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+    return jsonpResponse(callback, { success: true, inserted: rows.length });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
+  }
+}
