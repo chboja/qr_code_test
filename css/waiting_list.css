@@ -293,3 +293,39 @@ button.dynamic-button:hover {
   height: auto !important;
   border-radius: 8px;
 }
+
+.guest-count-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.guest-count-wrapper button {
+  font-size: 28px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background-color: #2e86de;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.guest-count-wrapper button:hover {
+  background-color: #1b4f9c;
+}
+
+.guest-count-wrapper input {
+  width: 80px;
+  height: 48px;
+  text-align: center;
+  font-size: 24px;
+  background-color: #f8f8f8;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 12px;
+  pointer-events: none;
+  user-select: none;
+}

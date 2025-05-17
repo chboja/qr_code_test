@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const html5QrCode = new Html5Qrcode(qrRegionId);
 
   function onScanSuccess(decodedText, decodedResult) {
+    html5QrCode.pause(); // 중복 스캔 방지
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
@@ -118,6 +119,22 @@ document.addEventListener("DOMContentLoaded", () => {
                   if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
                   if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
                   document.getElementById("guestCountInput").focus();
+
+                  // + / - 버튼 이벤트 바인딩
+                  const inputEl = document.getElementById("guestCountInput");
+                  const decreaseBtn = document.getElementById("decreaseGuestBtn");
+                  const increaseBtn = document.getElementById("increaseGuestBtn");
+
+                  decreaseBtn.onclick = () => {
+                    let val = parseInt(inputEl.value) || 1;
+                    if (val > 1) inputEl.value = val - 1;
+                  };
+
+                  increaseBtn.onclick = () => {
+                    let val = parseInt(inputEl.value) || 1;
+                    const max = window.maxGuestsFromQR || 10;
+                    if (val < max) inputEl.value = val + 1;
+                  };ㄱ
 
                   // Save to localStorage
                   const now = new Date();
@@ -474,21 +491,33 @@ document.addEventListener("DOMContentLoaded", () => {
   window.closeCustomPrompt = function() {
     document.getElementById("customPromptOverlay").style.display = "none";
     document.getElementById("guestCountInput").value = "";
-    html5QrCode.start(
-      { facingMode: "user" },
-      {
-        fps: 10,
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
-          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-          const boxSize = Math.floor(minEdge * 0.7);
-          return { width: boxSize, height: boxSize };
-        }
-      },
-      onScanSuccess
-    ).catch(err => {
+    html5QrCode.stop().then(() => {
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      );
+    }).catch(err => {
       console.error("再起動エラー:", err);
     });
   };
+
+  // 팝업 외부 터치 시 닫기 (cancel 동작 실행)
+  const overlay = document.getElementById("customPromptOverlay");
+  if (overlay) {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) {
+        window.closeCustomPrompt(); // 외부 터치 시 팝업 닫기
+      }
+    });
+  }
 });
 
 window.handlePostResponse = function(response) {
