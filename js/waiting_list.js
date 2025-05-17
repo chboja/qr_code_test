@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbzqC05DHC4AiZc1dTDDxy1yKkgfJN1nMrDZVj9cMitOYB8jz8erPhI5QfZw8K_TxU6QNw/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbz8gAPzSSjqgmXgWYqZJb4HAf2A7Bt3j70FKngVsiJ7yrGiGAND9QH61iSBdOu7qMDeYw/exec";
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
           timestamp: timestamp
         });
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
           + `&room=${encodeURIComponent(roomNum)}`
           + `&guests=${encodeURIComponent(guests)}`
           + `&timestamp=${encodeURIComponent(timestamp)}`;
@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 timestamp: timestamp
               });
               const jsonpScript = document.createElement("script");
-              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
                 + `&room=${encodeURIComponent(roomNum)}`
                 + `&guests=${encodeURIComponent(guests)}`
                 + `&timestamp=${encodeURIComponent(timestamp)}`;
@@ -399,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
           timestamp: timestamp
         });
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
           + `&room=${encodeURIComponent(roomNum)}`
           + `&guests=${encodeURIComponent(guests)}`
           + `&timestamp=${encodeURIComponent(timestamp)}`;
