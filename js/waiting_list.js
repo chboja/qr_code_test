@@ -236,6 +236,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = document.getElementById("qrResult").value.trim();
     if (!text) {
       alert("QRコードをスキャンしてください。");
+      // Restart QR scanner after search attempt
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("検索後にQRスキャナ再起動エラー:", err);
+      });
       return;
     }
 
@@ -252,6 +267,21 @@ document.addEventListener("DOMContentLoaded", () => {
           }).join("\n");
           alert(display);
         }
+        // Restart QR scanner after search attempt
+        html5QrCode.start(
+          { facingMode: "user" },
+          {
+            fps: 10,
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const boxSize = Math.floor(minEdge * 0.7);
+              return { width: boxSize, height: boxSize };
+            }
+          },
+          onScanSuccess
+        ).catch(err => {
+          console.error("検索後にQRスキャナ再起動エラー:", err);
+        });
         return;
       }
 
@@ -268,6 +298,21 @@ document.addEventListener("DOMContentLoaded", () => {
       if (command === "1") {
         if (!room || !guests) {
           alert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
+          // Restart QR scanner after search attempt
+          html5QrCode.start(
+            { facingMode: "user" },
+            {
+              fps: 10,
+              qrbox: function(viewfinderWidth, viewfinderHeight) {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                const boxSize = Math.floor(minEdge * 0.7);
+                return { width: boxSize, height: boxSize };
+              }
+            },
+            onScanSuccess
+          ).catch(err => {
+            console.error("検索後にQRスキャナ再起動エラー:", err);
+          });
           return;
         }
 
@@ -329,6 +374,21 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (command === "2") {
         if (!room) {
           alert("キャンセルには部屋番号が必要です（例: #2,501）");
+          // Restart QR scanner after search attempt
+          html5QrCode.start(
+            { facingMode: "user" },
+            {
+              fps: 10,
+              qrbox: function(viewfinderWidth, viewfinderHeight) {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                const boxSize = Math.floor(minEdge * 0.7);
+                return { width: boxSize, height: boxSize };
+              }
+            },
+            onScanSuccess
+          ).catch(err => {
+            console.error("検索後にQRスキャナ再起動エラー:", err);
+          });
           return;
         }
 
@@ -343,6 +403,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       document.getElementById("qrResult").value = "";
+      // Restart QR scanner after search attempt
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("検索後にQRスキャナ再起動エラー:", err);
+      });
       return;
     }
 
@@ -370,10 +445,40 @@ document.addEventListener("DOMContentLoaded", () => {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
           alert("QRコードが無効です。");
         }
+        // Restart QR scanner after search attempt
+        html5QrCode.start(
+          { facingMode: "user" },
+          {
+            fps: 10,
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const boxSize = Math.floor(minEdge * 0.7);
+              return { width: boxSize, height: boxSize };
+            }
+          },
+          onScanSuccess
+        ).catch(err => {
+          console.error("検索後にQRスキャナ再起動エラー:", err);
+        });
       });
     } else {
       logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
       alert("QRコードの形式が正しくありません。");
+      // Restart QR scanner after search attempt
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("検索後にQRスキャナ再起動エラー:", err);
+      });
     }
   });
 

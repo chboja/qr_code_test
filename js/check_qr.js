@@ -76,6 +76,21 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Verification request failed:", err);
         alert("サーバーとの確認中にエラーが発生しました。");
       }
+
+      html5QrCode.start(
+        { facingMode: "user" },
+        {
+          fps: 10,
+          qrbox: function(viewfinderWidth, viewfinderHeight) {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.floor(minEdge * 0.7);
+            return { width: boxSize, height: boxSize };
+          }
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("検索後にQRスキャナ再起動エラー:", err);
+      });
     });
   }
 

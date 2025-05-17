@@ -278,73 +278,85 @@ window.handleRoomSearchResult = function(response) {
 document.addEventListener("DOMContentLoaded", () => {
   const SHEET_NAME_SEARCH_API = getSheetApiUrl();
 
-    // ✅ チェックイン日を本日の日付に設定
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    document.getElementById("checkIn").value = `${yyyy}-${mm}-${dd}`;
+  // ✅ チェックイン日を本日の日付に設定
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById("checkIn").value = `${yyyy}-${mm}-${dd}`;
 
-  
-    const form = document.getElementById("qrForm");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      document.querySelectorAll("input").forEach(el => el.blur());
+  const form = document.getElementById("qrForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    document.querySelectorAll("input").forEach(el => el.blur());
 
-      const name = document.getElementById("name")?.value.trim() || "";
-      const room = document.getElementById("room").value.trim() || "";
-      const checkIn = document.getElementById("checkIn").value || "";
-      const checkOut = document.getElementById("checkOut").value || "";
-      const guests = document.getElementById("guests").value || "";
-      const reservation = document.getElementById("reservation").value.trim() || "";
-      const breakfast = document.getElementById("breakfast")?.value.trim() || "";
+    const name = document.getElementById("name")?.value.trim() || "";
+    const room = document.getElementById("room").value.trim() || "";
+    const checkIn = document.getElementById("checkIn").value || "";
+    const checkOut = document.getElementById("checkOut").value || "";
+    const guests = document.getElementById("guests").value || "";
+    const reservation = document.getElementById("reservation").value.trim() || "";
+    const breakfast = document.getElementById("breakfast")?.value.trim() || "";
 
-      const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
-      const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
-      const qrText = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag},${hash}`;
+    const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
+    const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
+    const qrText = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag},${hash}`;
 
-      // ✅ 팝업 티켓 정보 표시
-      const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}<br>Booking No : ${reservation}`;
-      document.getElementById("popupText").innerHTML = textInfo;
-      const popupQR = document.getElementById("popupQR");
-      popupQR.innerHTML = "";
-      new QRCode(popupQR, {
-        text: qrText,
-        width: 160,
-        height: 160,
-        correctLevel: QRCode.CorrectLevel.H
-      });
-      document.getElementById("qrOverlay").style.display = "flex";
-      // Make overlay dismissible by clicking outside the popup
-      const qrOverlay = document.getElementById("qrOverlay");
-      qrOverlay.addEventListener("click", function (e) {
-        if (e.target === qrOverlay) {
-          qrOverlay.style.display = "none";
-        }
-      });
+    // ✅ 팝업 티켓 정보 표시
+    const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}<br>Booking No : ${reservation}`;
+    document.getElementById("popupText").innerHTML = textInfo;
+    const popupQR = document.getElementById("popupQR");
+    popupQR.innerHTML = "";
+    new QRCode(popupQR, {
+      text: qrText,
+      width: 160,
+      height: 160,
+      correctLevel: QRCode.CorrectLevel.H
     });
-  
-    // ✅ Enter 키 입력 시 키보드 닫기
-    document.getElementById("guests").addEventListener("keydown", (e) => {
+    document.getElementById("qrOverlay").style.display = "flex";
+    // Make overlay dismissible by clicking outside the popup
+    const qrOverlay = document.getElementById("qrOverlay");
+    qrOverlay.addEventListener("click", function (e) {
+      if (e.target === qrOverlay) {
+        qrOverlay.style.display = "none";
+      }
+    });
+  });
+
+  // ✅ Enter 키 입력 시 키보드 닫기 (guests)
+  document.getElementById("guests").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // submit 방지
+      e.target.blur(); // 키보드 닫기
+    }
+  });
+
+  // ✅ 이름 입력창에서 Enter 시 검색 버튼 클릭 (폼 제출 방지)
+  const nameInput = document.getElementById("name");
+  if (nameInput) {
+    nameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); // submit 방지
-        e.target.blur(); // 키보드 닫기
+        e.preventDefault(); // 폼 제출 방지
+        nameInput.blur();   // 키보드 닫기
+        const searchBtName = document.getElementById("searchBtName");
+        if (searchBtName) searchBtName.click(); // 이름 검색 버튼 클릭
       }
     });
-  
-    // ✅ 입력 외의 영역을 터치하면 키보드 닫기
-    document.addEventListener("touchstart", (e) => {
-      const active = document.activeElement;
-      if (
-        active &&
-        (active.tagName === "INPUT" || active.tagName === "TEXTAREA") &&
-        !e.target.closest("input") &&
-        !e.target.closest("textarea")
-      ) {
-        active.blur();
-      }
-    });
-  
+  }
+
+  // ✅ 입력 외의 영역을 터치하면 키보드 닫기
+  document.addEventListener("touchstart", (e) => {
+    const active = document.activeElement;
+    if (
+      active &&
+      (active.tagName === "INPUT" || active.tagName === "TEXTAREA") &&
+      !e.target.closest("input") &&
+      !e.target.closest("textarea")
+    ) {
+      active.blur();
+    }
+  });
+
   // ✅ 파일 선택 후 input 초기화 (같은 파일도 다시 선택 가능)
   const fileInput = document.getElementById("fileInput");
   if (fileInput) {
