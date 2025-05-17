@@ -1,3 +1,4 @@
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwp_aNEv1lc2CWHVW69BCNLiMm2ldSKZc4eyN1D5P5TlmCJVAhfy2aYoBrs2IpqNiuY2w/exec";
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listContainer.appendChild(button);
   });
 
-  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbx2QKA2TI6_7Js9jNw1H5E0g12HNeXRSQSX8YCAL5MGHadyHlZF4cw0zyZiZ6DYgCwupQ/exec";
+  // const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbx2QKA2TI6_7Js9jNw1H5E0g12HNeXRSQSX8YCAL5MGHadyHlZF4cw0zyZiZ6DYgCwupQ/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
   const html5QrCode = new Html5Qrcode(qrRegionId);
