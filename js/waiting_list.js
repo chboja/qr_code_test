@@ -44,27 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
-
-        // Send to Google Apps Script
-        fetch(SCRIPT_BASE_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            room: roomNum,
-            guests: guests,
-            timestamp: timestamp
-          })
-        })
-        .then(response => response.text())
-        .then(result => {
-          alert(`${roomNum}号 ${guests}名 を記録しました`);
-        })
-        .catch(err => {
-          alert("送信中にエラーが発生しました。");
-          console.error("送信エラー:", err);
-        });
+        // Send to Google Apps Script via JSONP
+        const jsonpScript = document.createElement("script");
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+        document.body.appendChild(jsonpScript);
       }
     };
     listContainer.appendChild(button);
@@ -270,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.setItem("waitingList", JSON.stringify(localData));
 
-        logDebug(`🟢 ${room}号 ${guests}名 を大気リストに追加または更新`);
+        logDebug(`🟢 ${room}号 ${guests}名 を待機リストに追加または更新`);
       } else if (command === "2") {
         if (!room) {
           alert("キャンセルには部屋番号が必要です（例: #2,501）");
@@ -279,12 +262,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (existingButton) {
           listContainer.removeChild(existingButton);
-          logDebug(`🗑️ ${room}号 を大気リストから削除`);
+          logDebug(`🗑️ ${room}号 を待機リストから削除`);
         } else {
-          alert(`${room}号 は大気リストに存在しません`);
+          alert(`${room}号 は待機リストに存在しません`);
         }
       } else {
-        alert("不明なコマンドです。#1 または #2 を使用してください。");
+        alert("不明なコマンドです。");
       }
 
       document.getElementById("qrResult").value = "";
@@ -410,3 +393,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("guestCountInput").value = "";
   };
 });
+// JSONP callback for breakfast_list POST
+window.handlePostResponse = function(response) {
+  if (response && response.success) {
+    alert("記録が完了しました。");
+  } else {
+    alert("記録中にエラーが発生しました。");
+    console.error("記録エラー:", response);
+  }
+};
