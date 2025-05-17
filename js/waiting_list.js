@@ -157,11 +157,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
+                // Resume QR scanning after alert (with delay for iOS/Safari)
+                setTimeout(() => {
+                  html5QrCode.resume().catch(err => {
+                    console.error("QRコード再開エラー:", err);
+                  });
+                }, 300);
                 alert("すみません、フロントでご確認ください。");
-                // Resume QR scanning after alert
-                html5QrCode.resume().catch(err => {
-                  console.error("QRコード再開エラー:", err);
-                });
               }
             })
             .catch(err => {

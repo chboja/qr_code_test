@@ -289,6 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("qrForm");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      document.querySelectorAll("input").forEach(el => el.blur());
 
       const name = document.getElementById("name")?.value.trim() || "";
       const room = document.getElementById("room").value.trim() || "";
