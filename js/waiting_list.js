@@ -56,9 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function generateHash({ room, checkIn, checkOut, reservation }) {
+  async function generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }) {
     const secret = "HOTEL_ONLY_SECRET_KEY";
-    const data = `${room},${checkIn},${checkOut},${reservation}`;
+    const data = `${room},${checkIn},${checkOut},${reservation},${breakfastFlag}`;
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
@@ -119,9 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const parts = text.split(",");
-    if (parts.length === 6) {
-      const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
-      generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
+    if (parts.length === 7) {
+      const [room, checkIn, checkOut, breakfastFlag, guest, reservation, hashFromQR] = parts;
+      generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           logDebug("🟢 QR코드 형식 및 해시 일치 → 검색 실행");
           window.currentRoomText = text;

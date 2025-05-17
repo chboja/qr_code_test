@@ -2,9 +2,9 @@
 // Include WanaKana for romaji to katakana conversion
 
 // --- generateHash function (standalone, not imported) ---
-async function generateHash(room, checkIn, checkOut, guests, reservation) {
+async function generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag) {
   const secret = "HOTEL_ONLY_SECRET_KEY";
-  const data = `${room},${checkIn},${checkOut},${reservation}`;
+  const data = `${room},${checkIn},${checkOut},${reservation},${breakfastFlag}`;
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
@@ -298,8 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const reservation = document.getElementById("reservation").value.trim() || "";
       const breakfast = document.getElementById("breakfast")?.value.trim() || "";
 
-      const hash = await generateHash(room, checkIn, checkOut, guests, reservation);
       const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
+      const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
       const qrText = `${room},${checkIn},${checkOut},${breakfastFlag},${guests},${reservation},${hash}`;
 
       // ✅ 팝업 티켓 정보 표시
