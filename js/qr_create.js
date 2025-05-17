@@ -223,7 +223,7 @@ window.handleSearchResult = function(response) {
 
       foundResults.forEach((item, index) => {
         const li = document.createElement("li");
-        li.textContent = `${item.name}（#${item.room}）${formatToMMDD(item.checkIn)}-${formatToMMDD(item.checkOut)}`;
+        li.textContent = `${item.name}, #${item.room}, ${formatToMMDD(item.checkIn)} - ${formatToMMDD(item.checkOut)}`;
         li.addEventListener("click", () => {
           fillFormWithData(item);
           closeSelectPopup();
