@@ -1,5 +1,18 @@
 const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbz8gAPzSSjqgmXgWYqZJb4HAf2A7Bt3j70FKngVsiJ7yrGiGAND9QH61iSBdOu7qMDeYw/exec";
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Custom Alert Modal Helper ---
+  function showCustomAlert(message) {
+    const overlay = document.createElement("div");
+    overlay.className = "custom-alert-overlay";
+    overlay.innerHTML = `
+      <div class="custom-alert-box">
+        <p>${message.replace(/\n/g, "<br>")}</p>
+        <button id="customAlertClose">OK</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById("customAlertClose").onclick = () => overlay.remove();
+  }
   // Prevent duplicate scans of the same QR code
   let lastScannedText = "";
   // --- Reusable QR scanner restart function ---
@@ -83,6 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
           + `&guests=${encodeURIComponent(guests)}`
           + `&timestamp=${encodeURIComponent(timestamp)}`;
         document.body.appendChild(jsonpScript);
+        // Restart QR scanner immediately after processing button click
+        restartQrScanner();
       }
     };
     listContainer.appendChild(button);
@@ -128,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const existing = localData.find(entry => entry.split(",")[0] === room);
                   if (existing && existing.split(",")[3] === "1") {
                     lastScannedText = "";
-                    alert(`${room}号はすでに朝食を召し上がりました。\nThis room has already had breakfast.`);
+                    showCustomAlert(`${room}号はすでに朝食を召し上がりました。\nThis room has already had breakfast.`);
                     return;
                   }
                   window.currentRoomText = room;
@@ -181,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   localStorage.setItem("waitingList", JSON.stringify(localData));
                 } else {
                   lastScannedText = "";
-                  alert(`${room}号はRoom Onlyプランです。\nThis room is a Room Only plan.`);
+                  showCustomAlert(`${room}号はRoom Onlyプランです。\nThis room is a Room Only plan.`);
                 }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
@@ -190,20 +205,20 @@ document.addEventListener("DOMContentLoaded", () => {
                   restartQrScanner();
                 }, 300);
                 lastScannedText = "";
-                alert("すみません、フロントでご確認ください。");
+                showCustomAlert("すみません、フロントでご確認ください。");
               }
             })
             .catch(err => {
               const loading = document.getElementById("loadingOverlay");
               if (loading) loading.style.display = "none";
               console.error("🔴 예약번호 확인 중 오류 발생", err);
-              alert("予約番号の確認中にエラーが発生しました。");
+              showCustomAlert("予約番号の確認中にエラーが発生しました。");
             });
           // END 추가
         } else {
           console.warn("🔴 QRコードのハッシュが一致しません（無効なQR）");
           lastScannedText = "";
-          alert("QRコードが無効です。");
+          showCustomAlert("QRコードが無効です。");
         }
       });
     } else {
@@ -263,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
   submitBtn.addEventListener("click", () => {
     const text = document.getElementById("qrResult").value.trim();
     if (!text) {
-      alert("QRコードをスキャンしてください。");
+      showCustomAlert("QRコードをスキャンしてください。");
       // Clear input field after processing
       document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
@@ -275,14 +290,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (text === "#0") {
         const allData = JSON.parse(localStorage.getItem("waitingList") || "[]");
         if (allData.length === 0) {
-          alert("ローカルストレージにデータがありません。");
+          showCustomAlert("ローカルストレージにデータがありません。");
         } else {
           const display = allData.map(entry => {
             const parts = entry.split(",");
             const statusText = parts[3] === "1" ? "入場" : "待機";
             return `${parts[0]}号 ${parts[1]}名 ${parts[2]} (${statusText})`;
           }).join("\n");
-          alert(display);
+          showCustomAlert(display);
         }
         // Clear input field after processing
         document.getElementById("qrResult").value = "";
@@ -303,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (command === "1") {
         if (!room || !guests) {
-          alert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
+          showCustomAlert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
           // Clear input field after processing
           document.getElementById("qrResult").value = "";
           // Restart QR scanner after search attempt
@@ -368,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
         logDebug(`🟢 ${room}号 ${guests}名 を待機リストに追加または更新`);
       } else if (command === "2") {
         if (!room) {
-          alert("キャンセルには部屋番号が必要です（例: #2,501）");
+          showCustomAlert("キャンセルには部屋番号が必要です（例: #2,501）");
           // Clear input field after processing
           document.getElementById("qrResult").value = "";
           // Restart QR scanner after search attempt
@@ -380,10 +395,10 @@ document.addEventListener("DOMContentLoaded", () => {
           listContainer.removeChild(existingButton);
           logDebug(`🗑️ ${room}号 を待機リストから削除`);
         } else {
-          alert(`${room}号 は待機リストに存在しません`);
+          showCustomAlert(`${room}号 は待機リストに存在しません`);
         }
       } else {
-        alert("不明なコマンドです。");
+        showCustomAlert("不明なコマンドです。");
       }
 
       // Clear input field after processing
@@ -415,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
         } else {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
-          alert("QRコードが無効です。");
+          showCustomAlert("QRコードが無効です。");
         }
         // Clear input field after processing
         document.getElementById("qrResult").value = "";
@@ -424,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     } else {
       logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
-      alert("QRコードの形式が正しくありません。");
+      showCustomAlert("QRコードの形式が正しくありません。");
       // Clear input field after processing
       document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
@@ -480,11 +495,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window.submitGuestCount = function() {
     const guests = document.getElementById("guestCountInput").value;
     if (!guests) {
-      alert("人数を入力してください。\nPlease enter the number of guests.");
+      showCustomAlert("人数を入力してください。\nPlease enter the number of guests.");
       return;
     }
     if (window.maxGuestsFromQR && parseInt(guests) > window.maxGuestsFromQR) {
-      alert(`最大人数は${window.maxGuestsFromQR}名です。\nThe maximum number of guests is ${window.maxGuestsFromQR}.`);
+      showCustomAlert(`最大人数は${window.maxGuestsFromQR}名です。\nThe maximum number of guests is ${window.maxGuestsFromQR}.`);
       return;
     }
 
@@ -584,10 +599,10 @@ document.addEventListener("DOMContentLoaded", () => {
 window.handlePostResponse = function(response) {
   console.log("📦 서버 응답:", response); // 콘솔에 출력
   if (response && response.success) {
-    alert("記録が完了しました。");
+    showCustomAlert("記録が完了しました。");
     restartQrScanner();
   } else {
-    alert("記録中にエラーが発生しました。");
+    showCustomAlert("記録中にエラーが発生しました。");
     console.error("記録エラー:", response);
     restartQrScanner();
   }
