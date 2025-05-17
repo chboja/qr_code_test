@@ -60,7 +60,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
     document.body.appendChild(overlay);
-    document.getElementById("customAlertClose").onclick = () => overlay.remove();
+
+    const close = () => {
+      if (overlay && overlay.parentNode) {
+        overlay.remove();
+      }
+    };
+
+    document.getElementById("customAlertClose").onclick = close;
+
+    // Auto close after 3 seconds
+    setTimeout(close, 3000);
   }
   // Prevent duplicate scans of the same QR code
   let lastScannedText = "";
@@ -582,6 +592,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("customPromptOverlay").style.display = "none";
     // Clear lastScannedText so the same QR can be scanned again
     lastScannedText = "";
+    // Show confirmation message before restarting QR scanner
+    showCustomAlert("スタッフがお呼びするまで、少々お待ちください。\nPlease wait until the staff calls you.");
     // Restart QR scanner after submitting guest count
     restartQrScanner();
   };
