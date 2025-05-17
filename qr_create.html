@@ -12,20 +12,17 @@
 </head>
 <body>  
 
-  <h1 style="display: flex; align-items: center; justify-content: space-between;">
-    Hotel VR Osaka
-  </h1>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+    <h1 style="font-size: 22px; margin: 0;">QRコード生成</h1>
+    <div class="inline-buttons">
+      <button type="button" id="uploadBtn">アップロード</button>
+    </div>
+  </div>
 
   <div class="container">
 
     <!-- ✅ QR 生成エリア -->
     <section>
-      <h2 style="display: flex; align-items: center; justify-content: space-between;">
-        QRコード生成
-        <span class="inline-buttons">
-          <button type="button" id="uploadBtn">アップロード</button>
-        </span>
-      </h2>
       <form id="qrForm" autocomplete="off">
         <div class="name-search" style="margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 10px;">

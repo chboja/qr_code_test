@@ -32,6 +32,13 @@ body {
     display: block;
   }
   
+  .vertical-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
   input,
   textarea {
     width: 100%;
@@ -192,4 +199,20 @@ body {
 
 .popup button:hover {
   background-color: #1b4f9c;
+}
+
+/* ===== Custom header-wrapper and h1 styles ===== */
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 0;
+  white-space: nowrap;
 }
