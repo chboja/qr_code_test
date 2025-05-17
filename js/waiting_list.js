@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
                   const existing = localData.find(entry => entry.split(",")[0] === room);
                   if (existing && existing.split(",")[3] === "1") {
-                    alert(`${room}号はすでに朝食を召し上がりました。`);
+                    alert(`${room}号はすでに朝食を召し上がりました。\nThis room has already had breakfast.`);
                     return;
                   }
                   window.currentRoomText = room;
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     if (window.maxGuestsFromQR && parseInt(guests) > window.maxGuestsFromQR) {
-      alert(`最大人数は${window.maxGuestsFromQR}名です。`);
+      alert(`最大人数は${window.maxGuestsFromQR}名です。\nThe maximum number of guests is ${window.maxGuestsFromQR}.`);
       return;
     }
 
