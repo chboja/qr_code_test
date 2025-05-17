@@ -263,6 +263,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = document.getElementById("qrResult").value.trim();
     if (!text) {
       alert("QRコードをスキャンしてください。");
+      // Clear input field after processing
+      document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
       restartQrScanner();
       return;
@@ -281,6 +283,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }).join("\n");
           alert(display);
         }
+        // Clear input field after processing
+        document.getElementById("qrResult").value = "";
         // Restart QR scanner after search attempt
         restartQrScanner();
         return;
@@ -299,6 +303,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (command === "1") {
         if (!room || !guests) {
           alert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
+          // Clear input field after processing
+          document.getElementById("qrResult").value = "";
           // Restart QR scanner after search attempt
           restartQrScanner();
           return;
@@ -362,6 +368,8 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (command === "2") {
         if (!room) {
           alert("キャンセルには部屋番号が必要です（例: #2,501）");
+          // Clear input field after processing
+          document.getElementById("qrResult").value = "";
           // Restart QR scanner after search attempt
           restartQrScanner();
           return;
@@ -377,6 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("不明なコマンドです。");
       }
 
+      // Clear input field after processing
       document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
       restartQrScanner();
@@ -407,12 +416,16 @@ document.addEventListener("DOMContentLoaded", () => {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
           alert("QRコードが無効です。");
         }
+        // Clear input field after processing
+        document.getElementById("qrResult").value = "";
         // Restart QR scanner after search attempt
         restartQrScanner();
       });
     } else {
       logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
       alert("QRコードの形式が正しくありません。");
+      // Clear input field after processing
+      document.getElementById("qrResult").value = "";
       // Restart QR scanner after search attempt
       restartQrScanner();
     }
@@ -506,7 +519,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const listContainer = document.getElementById("List");
-    listContainer.appendChild(button);
+    // Check for an existing button with the same room number before appending
+    const existingButton = Array.from(listContainer.children).find(btn =>
+      btn.textContent.startsWith(`${text}号`)
+    );
+
+    if (existingButton) {
+      existingButton.textContent = `${text}号 ${guests}名`;
+    } else {
+      listContainer.appendChild(button);
+    }
 
     // --- localStorage에 저장 ---
     const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
