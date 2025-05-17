@@ -231,7 +231,19 @@ document.addEventListener("DOMContentLoaded", () => {
           button.classList.add("dynamic-button");
           button.textContent = `${room}号 ${guests}名`;
           button.onclick = () => {
-            alert(`"${room}" (${guests}名) ボタンがクリックされました`);
+            const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+            const index = localData.findIndex(entry => entry.split(",")[0] === room);
+            if (index !== -1) {
+              const [roomNum, guests, timestamp] = localData[index].split(",");
+              const updatedEntry = `${roomNum},${guests},${timestamp},1`;
+              localData[index] = updatedEntry;
+              localStorage.setItem("waitingList", JSON.stringify(localData));
+
+              // JSONP 방식으로 서버에 데이터 전송
+              const jsonpScript = document.createElement("script");
+              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+              document.body.appendChild(jsonpScript);
+            }
           };
           listContainer.appendChild(button);
         }
