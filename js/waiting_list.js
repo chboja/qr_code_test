@@ -31,6 +31,24 @@ document.addEventListener("DOMContentLoaded", () => {
                   window.currentRoomText = room;
                   window.maxGuestsFromQR = parseInt(guests);
                   document.getElementById("customPromptOverlay").style.display = "flex";
+
+                  // Save to localStorage
+                  const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+                  const now = new Date();
+                  const yyyy = now.getFullYear();
+                  const mm = String(now.getMonth() + 1).padStart(2, '0');
+                  const dd = String(now.getDate()).padStart(2, '0');
+                  const hh = String(now.getHours()).padStart(2, '0');
+                  const min = String(now.getMinutes()).padStart(2, '0');
+                  const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                  const newData = `${room},${parseInt(guests)},${formattedTime}`;
+                  const index = localData.findIndex(entry => entry.startsWith(`${room},`));
+                  if (index !== -1) {
+                    localData[index] = newData;
+                  } else {
+                    localData.push(newData);
+                  }
+                  localStorage.setItem("waitingList", JSON.stringify(localData));
                 } else {
                   alert(`${room}号はRoom Onlyプランです`);
                 }
@@ -140,6 +158,24 @@ document.addEventListener("DOMContentLoaded", () => {
           };
           listContainer.appendChild(button);
         }
+
+        // Save to localStorage
+        const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        const newData = `${room},${parseInt(guests)},${formattedTime}`;
+        const index = localData.findIndex(entry => entry.startsWith(`${room},`));
+        if (index !== -1) {
+          localData[index] = newData;
+        } else {
+          localData.push(newData);
+        }
+        localStorage.setItem("waitingList", JSON.stringify(localData));
 
         logDebug(`🟢 ${room}号 ${guests}名 を大気リストに追加または更新`);
       } else if (command === "2") {
