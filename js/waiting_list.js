@@ -11,26 +11,33 @@ document.addEventListener("DOMContentLoaded", () => {
     html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
 
     const parts = decodedText.split(",");
-    if (parts.length === 6) {
-      const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
+    if (parts.length === 7) {
+      const [room, checkIn, checkOut, breakfastFlag, guests, reservation, hashFromQR] = parts;
       generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           // 추가: 예약번호 서버 확인
+          document.getElementById("loadingOverlay").style.display = "flex";
           fetch(`${SCRIPT_BASE_URL}?verifyReservation=${reservation}&callback=verifyCallback`)
             .then(response => response.text())
             .then(text => {
+              document.getElementById("loadingOverlay").style.display = "none";
               const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
               const result = JSON.parse(jsonText);
               if (result.success && result.exists) {
-                console.log("✅ 예약번호 및 해시 서버 검증 통과 → 검색 실행");
-                window.currentRoomText = room;  // 방 번호만 currentRoomText에 저장
-                document.getElementById("customPromptOverlay").style.display = "flex"; // 인원 입력창 바로 표시
+                if (breakfastFlag === "1") {
+                  window.currentRoomText = room;
+                  window.maxGuestsFromQR = parseInt(guests);
+                  document.getElementById("customPromptOverlay").style.display = "flex";
+                } else {
+                  alert(`${room}号はRoom Onlyプランです`);
+                }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
                 alert("すみません、フロントでご確認ください。");
               }
             })
             .catch(err => {
+              document.getElementById("loadingOverlay").style.display = "none";
               console.error("🔴 예약번호 확인 중 오류 발생", err);
               alert("予約番号の確認中にエラーが発生しました。");
             });
@@ -174,6 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const guests = document.getElementById("guestCountInput").value;
     if (!guests) {
       alert("人数を入力してください。");
+      return;
+    }
+    if (window.maxGuestsFromQR && parseInt(guests) > window.maxGuestsFromQR) {
+      alert(`最大人数は${window.maxGuestsFromQR}名です。`);
       return;
     }
 
