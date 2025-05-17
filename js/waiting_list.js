@@ -47,6 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("waitingList", JSON.stringify(localData));
 
         // Send to Google Apps Script via JSONP
+        console.log("📤 서버로 전송되는 데이터 확인:", {
+          room: roomNum,
+          guests: guests,
+          timestamp: timestamp
+        });
         const jsonpScript = document.createElement("script");
         jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
           + `&room=${encodeURIComponent(roomNum)}`
@@ -244,6 +249,11 @@ document.addEventListener("DOMContentLoaded", () => {
               localStorage.setItem("waitingList", JSON.stringify(localData));
 
               // JSONP 방식으로 서버에 데이터 전송
+              console.log("📤 서버로 전송되는 데이터 확인:", {
+                room: roomNum,
+                guests: guests,
+                timestamp: timestamp
+              });
               const jsonpScript = document.createElement("script");
               jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
                 + `&room=${encodeURIComponent(roomNum)}`
@@ -383,6 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
 
+        console.log("📤 서버로 전송되는 데이터 확인:", {
+          room: roomNum,
+          guests: guests,
+          timestamp: timestamp
+        });
         const jsonpScript = document.createElement("script");
         jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
           + `&room=${encodeURIComponent(roomNum)}`
