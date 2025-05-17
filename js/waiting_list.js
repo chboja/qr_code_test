@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
-    html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
 
     const parts = decodedText.split(",");
     if (parts.length === 7) {
