@@ -86,8 +86,8 @@ body {
   }
   
   #qrResult canvas {
-    width: 200px !important;
-    height: 200px !important;
+    width: 220px !important;
+    height: 220px !important;
   }
 .inline-buttons {
   display: flex;
@@ -217,4 +217,36 @@ h1 {
   font-size: 28px;
   margin: 0;
   white-space: nowrap;
+}
+
+/* ✅ 사용자 정의 선택 팝업 스타일 */
+#customSelectPopup .popup {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 90vw;
+  width: 400px;
+  font-size: 16px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+#customSelectPopup ul {
+  margin: 20px 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+#customSelectPopup ul li {
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#customSelectPopup ul li:hover {
+  background-color: #f0f0f0;
 }

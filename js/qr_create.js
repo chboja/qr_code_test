@@ -1,4 +1,30 @@
 
+
+// --- Overlay helpers for search (name/room) ---
+function showSearchOverlay() {
+  const overlay = document.createElement("div");
+  overlay.id = "searchOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "9999";
+  overlay.style.color = "white";
+  overlay.style.fontSize = "24px";
+  overlay.textContent = "検索中…";
+  document.body.appendChild(overlay);
+}
+
+function removeSearchOverlay() {
+  const existingOverlay = document.getElementById("searchOverlay");
+  if (existingOverlay) existingOverlay.remove();
+}
+
 // Include WanaKana for romaji to katakana conversion
 
 // --- generateHash function (standalone, not imported) ---
@@ -65,22 +91,7 @@ wanakanaScript.onload = () => {
         return;
       }
       // --- Show search overlay before sending requests ---
-      const overlay = document.createElement("div");
-      overlay.id = "searchOverlay";
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100vw";
-      overlay.style.height = "100vh";
-      overlay.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-      overlay.style.display = "flex";
-      overlay.style.justifyContent = "center";
-      overlay.style.alignItems = "center";
-      overlay.style.zIndex = "9999";
-      overlay.style.color = "white";
-      overlay.style.fontSize = "24px";
-      overlay.textContent = "検索中…";
-      document.body.appendChild(overlay);
+      showSearchOverlay();
 
       console.log("🧪 名前検索クリック");
       const baseInput = document.getElementById("name").value.trim();
@@ -88,8 +99,7 @@ wanakanaScript.onload = () => {
       if (!baseInput) {
         alert("名前を入力してください。");
         // Remove overlay if input is empty and early return
-        const existingOverlay = document.getElementById("searchOverlay");
-        if (existingOverlay) existingOverlay.remove();
+        removeSearchOverlay();
         return;
       }
 
@@ -131,6 +141,7 @@ wanakanaScript.onload = () => {
       console.log("🧪 部屋番号検索クリック");
       console.log("🔍 検索対象の部屋番号:", baseInput);
 
+      showSearchOverlay();
       const searchTerm = normalize(baseInput);
       const script = document.createElement("script");
       script.src = `${getSheetApiUrl()}?callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
@@ -188,8 +199,7 @@ window.handleSearchResult = function(response) {
 
   if (pendingNameRequests === 0) {
     // Remove search overlay
-    const existingOverlay = document.getElementById("searchOverlay");
-    if (existingOverlay) existingOverlay.remove();
+    removeSearchOverlay();
 
     if (foundResults.length === 0) {
       alert("一致する名前が見つかりませんでした。");
@@ -206,14 +216,22 @@ window.handleSearchResult = function(response) {
         const dd = String(date.getDate()).padStart(2, '0');
         return `${mm}/${dd}`;
       };
-      const nameOptions = foundResults.map((item, index) =>
-        `${index + 1}. ${item.name}, #${item.room}, ${formatToMMDD(item.checkIn)}-${formatToMMDD(item.checkOut)}`
-      ).join("\n");
-      const selected = prompt(`複数の一致が見つかりました。番号を選んでください:\n${nameOptions}`);
-      const selectedIndex = parseInt(selected, 10) - 1;
-      if (!isNaN(selectedIndex) && foundResults[selectedIndex]) {
-        fillFormWithData(foundResults[selectedIndex]);
-      }
+      // Show custom select popup instead of prompt
+      const popup = document.getElementById("customSelectPopup");
+      const optionList = document.getElementById("popupOptions");
+      optionList.innerHTML = ""; // Clear previous
+
+      foundResults.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name}（#${item.room}）${formatToMMDD(item.checkIn)}-${formatToMMDD(item.checkOut)}`;
+        li.addEventListener("click", () => {
+          fillFormWithData(item);
+          closeSelectPopup();
+        });
+        optionList.appendChild(li);
+      });
+
+      popup.style.display = "flex";
     }
 
     // Reset after handling
@@ -253,8 +271,7 @@ window.handleVerifyResponse = function(response) {
 window.handleRoomSearchResult = function(response) {
   console.log("🔍 部屋番号検索結果:", response);
   // Remove search overlay (in case it was shown, e.g., for future compatibility)
-  const existingOverlay = document.getElementById("searchOverlay");
-  if (existingOverlay) existingOverlay.remove();
+  removeSearchOverlay();
 
   if (!response.success || !response.matches || response.matches.length === 0) {
     alert("一致する部屋番号が見つかりませんでした。");
@@ -340,6 +357,18 @@ document.addEventListener("DOMContentLoaded", () => {
         nameInput.blur();   // 키보드 닫기
         const searchBtName = document.getElementById("searchBtName");
         if (searchBtName) searchBtName.click(); // 이름 검색 버튼 클릭
+      }
+    });
+  }
+
+  const roomInput = document.getElementById("room");
+  if (roomInput) {
+    roomInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        roomInput.blur();
+        const searchBtRoom = document.getElementById("searchBtRoom");
+        if (searchBtRoom) searchBtRoom.click();
       }
     });
   }
@@ -496,4 +525,13 @@ function uploadCsvChunksSequentially(chunks, index = 0, SHEET_API_URL) {
 // ✅ 팝업 닫기 함수
 function closePopup() {
   document.getElementById("qrOverlay").style.display = "none";
+}
+
+// ✅ 팝업 선택 닫기 함수
+function closeSelectPopup() {
+  const popup = document.getElementById("customSelectPopup");
+  if (popup) popup.style.display = "none";
+  // Optionally clear options
+  const optionList = document.getElementById("popupOptions");
+  if (optionList) optionList.innerHTML = "";
 }

@@ -40,7 +40,7 @@
             <label for="room">部屋番号</label>
             <button type="button" id="searchBtRoom" style="padding: 6px 12px;">検索</button>
           </div>
-          <input type="text" id="room" inputmode="numeric" pattern="[0-9]*" autocomplete="off" style="margin-top: 5px; width: 100%;" required>
+          <input type="text" id="room" inputmode="numeric" pattern="\d{3}" maxlength="3" autocomplete="off" style="margin-top: 5px; width: 100%;" required>
         </div>
         <label for="checkIn">チェックイン日</label>
         <input type="date" id="checkIn" autocomplete="off" required>
@@ -99,5 +99,13 @@
     </div>
   </div>
 
+  <div id="customSelectPopup" class="overlay" style="display: none;">
+    <div class="popup">
+      <p id="popupTitle">一致する候補を選んでください:</p>
+      <ul id="popupOptions" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
+      <button onclick="closeSelectPopup()">キャンセル / Cancel</button>
+    </div>
+  </div>
+  
 </body>
 </html>
