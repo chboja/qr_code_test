@@ -2,8 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadingOverlay").style.display = "none";
   const savedList = JSON.parse(localStorage.getItem("waitingList") || "[]");
   const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  // Remove entries not from today
-  const todayList = savedList.filter(entry => entry.split(",")[2].slice(0, 10) === today);
+  // Remove entries not from today and not between 06:00 and 10:59
+  const todayList = savedList.filter(entry => {
+    const timestamp = entry.split(",")[2];
+    const date = timestamp.slice(0, 10);
+    const hour = parseInt(timestamp.slice(11, 13));
+    return date === today && hour >= 6 && hour < 11;
+  });
   localStorage.setItem("waitingList", JSON.stringify(todayList));
   const listContainer = document.getElementById("List");
 
@@ -175,9 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("ローカルストレージにデータがありません。");
         } else {
           const display = allData.map(entry => {
-            const [room, guests, timestamp, status] = entry.split(",");
-            const statusText = status === "1" ? "入場" : "待機";
-            return `${room}号 ${guests}名 ${timestamp} (${statusText})`;
+            const parts = entry.split(",");
+            const statusText = parts[3] === "1" ? "入場" : "待機";
+            return `${parts[0]}号 ${parts[1]}名 ${parts[2]} (${statusText})`;
           }).join("\n");
           alert(display);
         }
