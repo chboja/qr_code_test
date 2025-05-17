@@ -127,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
                   const existing = localData.find(entry => entry.split(",")[0] === room);
                   if (existing && existing.split(",")[3] === "1") {
+                    lastScannedText = "";
                     alert(`${room}号はすでに朝食を召し上がりました。\nThis room has already had breakfast.`);
                     return;
                   }
@@ -178,16 +179,16 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                   localStorage.setItem("waitingList", JSON.stringify(localData));
                 } else {
+                  lastScannedText = "";
                   alert(`${room}号はRoom Onlyプランです。\nThis room is a Room Only plan.`);
                 }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
                 // Resume QR scanning after alert (with delay for iOS/Safari)
                 setTimeout(() => {
-                  html5QrCode.resume().catch(err => {
-                    console.error("QRコード再開エラー:", err);
-                  });
+                  restartQrScanner();
                 }, 300);
+                lastScannedText = "";
                 alert("すみません、フロントでご確認ください。");
               }
             })
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // END 추가
         } else {
           console.warn("🔴 QRコードのハッシュが一致しません（無効なQR）");
+          lastScannedText = "";
           alert("QRコードが無効です。");
         }
       });
@@ -531,7 +533,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
     document.getElementById("customPromptOverlay").style.display = "none";
-
+    // Clear lastScannedText so the same QR can be scanned again
+    lastScannedText = "";
     // Restart QR scanner after submitting guest count
     restartQrScanner();
   };
@@ -539,6 +542,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.closeCustomPrompt = function() {
     document.getElementById("customPromptOverlay").style.display = "none";
     document.getElementById("guestCountInput").value = "";
+    // Clear lastScannedText so the same QR can be scanned again
+    lastScannedText = "";
     restartQrScanner();
   };
 
