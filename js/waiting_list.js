@@ -113,9 +113,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (text.startsWith("#")) {
-      logDebug("✅ '#'로 시작하는 수동 명령어 입력됨 → 검색 허용");
-      window.currentRoomText = text;
-      document.getElementById("customPromptOverlay").style.display = "flex";
+      const parts = text.substring(1).split(",");
+      const command = parts[0];
+      const room = parts[1];
+      const guests = parts[2] || null;
+
+      const listContainer = document.getElementById("List");
+      const existingButton = Array.from(listContainer.children).find(btn =>
+        btn.textContent.startsWith(`${room}号`)
+      );
+
+      if (command === "1") {
+        if (!room || !guests) {
+          alert("追加するには部屋番号と人数が必要です（例: #1,501,2）");
+          return;
+        }
+
+        if (existingButton) {
+          existingButton.textContent = `${room}号 ${guests}名`;
+        } else {
+          const button = document.createElement("button");
+          button.classList.add("dynamic-button");
+          button.textContent = `${room}号 ${guests}名`;
+          button.onclick = () => {
+            alert(`"${room}" (${guests}名) ボタンがクリックされました`);
+          };
+          listContainer.appendChild(button);
+        }
+
+        logDebug(`🟢 ${room}号 ${guests}名 を大気リストに追加または更新`);
+      } else if (command === "2") {
+        if (!room) {
+          alert("キャンセルには部屋番号が必要です（例: #2,501）");
+          return;
+        }
+
+        if (existingButton) {
+          listContainer.removeChild(existingButton);
+          logDebug(`🗑️ ${room}号 を大気リストから削除`);
+        } else {
+          alert(`${room}号 は大気リストに存在しません`);
+        }
+      } else {
+        alert("不明なコマンドです。#1 または #2 を使用してください。");
+      }
+
+      document.getElementById("qrResult").value = "";
       return;
     }
 
