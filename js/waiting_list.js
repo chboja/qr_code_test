@@ -48,7 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Send to Google Apps Script via JSONP
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+          + `&room=${encodeURIComponent(roomNum)}`
+          + `&guests=${encodeURIComponent(guests)}`
+          + `&timestamp=${encodeURIComponent(timestamp)}`;
         document.body.appendChild(jsonpScript);
       }
     };
@@ -242,7 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
               // JSONP 방식으로 서버에 데이터 전송
               const jsonpScript = document.createElement("script");
-              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+                + `&room=${encodeURIComponent(roomNum)}`
+                + `&guests=${encodeURIComponent(guests)}`
+                + `&timestamp=${encodeURIComponent(timestamp)}`;
               document.body.appendChild(jsonpScript);
             }
           };
@@ -378,7 +384,10 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("waitingList", JSON.stringify(localData));
 
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&room=${encodeURIComponent(roomNum)}&guests=${encodeURIComponent(guests)}&timestamp=${encodeURIComponent(timestamp)}`;
+        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse`
+          + `&room=${encodeURIComponent(roomNum)}`
+          + `&guests=${encodeURIComponent(guests)}`
+          + `&timestamp=${encodeURIComponent(timestamp)}`;
         document.body.appendChild(jsonpScript);
       }
     };
