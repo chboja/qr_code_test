@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
+        // 버튼 비활성화 및 제거
+        button.disabled = true;
+        button.style.opacity = "0.5";
+        setTimeout(() => button.remove(), 300);
 
         // Send to Google Apps Script via JSONP
         console.log("📤 서버로 전송되는 데이터 확인:", {
@@ -72,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
+    setTimeout(() => { qrResult.value = ""; }, 500);
 
     const parts = decodedText.split(",");
     if (parts.length === 7) {
@@ -102,6 +107,16 @@ document.addEventListener("DOMContentLoaded", () => {
                   window.currentRoomText = room;
                   window.maxGuestsFromQR = parseInt(guests);
                   document.getElementById("customPromptOverlay").style.display = "flex";
+                  // Set prompt message in Japanese and English (2 lines)
+                  var promptLabel = document.getElementById("customPromptLabel");
+                  if (promptLabel) {
+                    promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+                  }
+                  // Set custom prompt button labels (2 lines, Japanese + English)
+                  var cancelBtn = document.getElementById("customPromptCancel");
+                  var confirmBtn = document.getElementById("customPromptConfirm");
+                  if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
+                  if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
                   document.getElementById("guestCountInput").focus();
 
                   // Save to localStorage
@@ -121,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                   localStorage.setItem("waitingList", JSON.stringify(localData));
                 } else {
-                  alert(`${room}号はRoom Onlyプランです`);
+                  alert(`${room}号はRoom Onlyプランです。\nThis room is a Room Only plan.`);
                 }
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
@@ -247,6 +262,10 @@ document.addEventListener("DOMContentLoaded", () => {
               const updatedEntry = `${roomNum},${guests},${timestamp},1`;
               localData[index] = updatedEntry;
               localStorage.setItem("waitingList", JSON.stringify(localData));
+              // 버튼 비활성화 및 제거
+              button.disabled = true;
+              button.style.opacity = "0.5";
+              setTimeout(() => button.remove(), 300);
 
               // JSONP 방식으로 서버에 데이터 전송
               console.log("📤 서버로 전송되는 데이터 확인:", {
@@ -314,6 +333,16 @@ document.addEventListener("DOMContentLoaded", () => {
           logDebug("🟢 QR코드 형식 및 해시 일치 → 검색 실행");
           window.currentRoomText = text;
           document.getElementById("customPromptOverlay").style.display = "flex";
+          // Set prompt message in Japanese and English (2 lines)
+          var promptLabel = document.getElementById("customPromptLabel");
+          if (promptLabel) {
+            promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+          }
+          // Set custom prompt button labels (2 lines, Japanese + English)
+          var cancelBtn = document.getElementById("customPromptCancel");
+          var confirmBtn = document.getElementById("customPromptConfirm");
+          if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
+          if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
         } else {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
           alert("QRコードが無効です。");
@@ -372,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.submitGuestCount = function() {
     const guests = document.getElementById("guestCountInput").value;
     if (!guests) {
-      alert("人数を入力してください。");
+      alert("人数を入力してください。\nPlease enter the number of guests.");
       return;
     }
     if (window.maxGuestsFromQR && parseInt(guests) > window.maxGuestsFromQR) {
@@ -392,6 +421,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
+        // 버튼 비활성화 및 제거
+        button.disabled = true;
+        button.style.opacity = "0.5";
+        setTimeout(() => button.remove(), 300);
 
         console.log("📤 서버로 전송되는 데이터 확인:", {
           room: roomNum,
