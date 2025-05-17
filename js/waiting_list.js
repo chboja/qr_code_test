@@ -248,6 +248,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const listContainer = document.getElementById("List");
     listContainer.appendChild(button);
 
+    // --- localStorage에 저장 ---
+    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const formattedTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+    const newData = `${text},${parseInt(guests)},${formattedTime}`;
+
+    // 기존 항목이 있다면 업데이트
+    const index = localData.findIndex(entry => entry.startsWith(`${text},`));
+    if (index !== -1) {
+      localData[index] = newData;
+    } else {
+      localData.push(newData);
+    }
+
+    localStorage.setItem("waitingList", JSON.stringify(localData));
+
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
     document.getElementById("customPromptOverlay").style.display = "none";
