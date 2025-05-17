@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
@@ -15,10 +14,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
       generateHash({ room, checkIn, checkOut, reservation }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
-          console.log("🟢 QRコード形式・検証成功 → 検索実行");
-          document.getElementById("searchButton").click();
+          // 추가: 예약번호 서버 확인
+          fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?verifyReservation=${reservation}&hashcode=${hashFromQR}&callback=verifyCallback`)
+            .then(response => response.text())
+            .then(text => {
+              const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
+              const result = JSON.parse(jsonText);
+              if (result.success && result.exists) {
+                console.log("✅ 예약번호 및 해시 서버 검증 통과 → 검색 실행");
+                window.currentRoomText = room;  // 방 번호만 currentRoomText에 저장
+                document.getElementById("customPromptOverlay").style.display = "flex"; // 인원 입력창 바로 표시
+              } else {
+                console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
+                alert("すみません、フロントでご確認ください。");
+              }
+            })
+            .catch(err => {
+              console.error("🔴 예약번호 확인 중 오류 발생", err);
+              alert("予約番号の確認中にエラーが発生しました。");
+            });
+          // END 추가
         } else {
           console.warn("🔴 QRコードのハッシュが一致しません（無効なQR）");
+          alert("QRコードが無効です。");
         }
       });
     } else {
@@ -32,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
+    // (아래에 아무것도 변경하지 않음)
   }
 
   Html5Qrcode.getCameras().then(devices => {
@@ -76,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   submitBtn.addEventListener("click", () => {
     const text = document.getElementById("qrResult").value.trim();
     if (!text) {
-      alert("部屋番号を入力してください。");
+      alert("QRコードをスキャンしてください。");
       return;
     }
 
@@ -97,10 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("customPromptOverlay").style.display = "flex";
         } else {
           logDebug("❌ QR코드 해시 불일치 → 검색 차단");
+          alert("QRコードが無効です。");
         }
       });
     } else {
       logDebug("⚠️ QR코드 형식 아님 → 검색 차단");
+      alert("QRコードの形式が正しくありません。");
     }
   });
 
