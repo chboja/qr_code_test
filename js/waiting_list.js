@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listContainer.appendChild(button);
   });
 
-  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbzColUcTtVLVSFPvIRwFb6JkRJfevJgZ9tNM-YS_sO-rn4L4Cae8P8GxhZI_ynk0-wt_w/exec";
+  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbx2QKA2TI6_7Js9jNw1H5E0g12HNeXRSQSX8YCAL5MGHadyHlZF4cw0zyZiZ6DYgCwupQ/exec";
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "reader";
   const html5QrCode = new Html5Qrcode(qrRegionId);
