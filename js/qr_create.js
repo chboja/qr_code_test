@@ -124,7 +124,9 @@ wanakanaScript.onload = () => {
         // --- Logging for name search JSONP ---
         console.log("📤 Sending search term to GAS:", term);
         const script = document.createElement("script");
-        script.src = `${getSheetApiUrl()}?mode=searchName&callback=handleSearchResult&name=${encodeURIComponent(term)}`;
+        const apiUrl = getSheetApiUrl();
+        const query = `mode=searchName&callback=handleSearchResult&name=${encodeURIComponent(term)}`;
+        script.src = `${apiUrl}?${query}`;
         console.log("📤 Full script URL:", script.src);
         document.body.appendChild(script);
       });
@@ -149,7 +151,9 @@ wanakanaScript.onload = () => {
       // --- Logging for room search JSONP ---
       console.log("📤 Sending room term to GAS:", searchTerm);
       const script = document.createElement("script");
-      script.src = `${getSheetApiUrl()}?mode=searchRoom&callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
+      const apiUrl = getSheetApiUrl();
+      const query = `mode=searchRoom&callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
+      script.src = `${apiUrl}?${query}`;
       console.log("📤 Full script URL:", script.src);
       document.body.appendChild(script);
     });
@@ -461,7 +465,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // --- 1. Clear sheet before uploading chunks (command-based) ---
             const commandScript = document.createElement("script");
-            commandScript.src = `${SHEET_API_URL}?callback=handleCommandResponse&command=clear`;
+            const clearQuery = `mode=importCsv&callback=handleCommandResponse&command=clear`;
+            commandScript.src = `${SHEET_API_URL}?${clearQuery}`;
             document.body.appendChild(commandScript);
 
             window.handleCommandResponse = function(response) {
@@ -497,7 +502,8 @@ function uploadCsvChunksSequentially(chunks, index = 0, SHEET_API_URL) {
     ).join(',')
   ).join(';');
   const script = document.createElement("script");
-  script.src = `${SHEET_API_URL}?callback=uploadChunkCallback&csv=${encodeURIComponent(csvChunk)}`;
+  const query = `mode=importCsv&callback=uploadChunkCallback&csv=${encodeURIComponent(csvChunk)}`;
+  script.src = `${SHEET_API_URL}?${query}`;
   document.body.appendChild(script);
 
   window.uploadChunkCallback = function(response) {
