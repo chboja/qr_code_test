@@ -187,8 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (parts.length === 7) {
       // Destructure in the correct order including guests
       const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
-      // Only pass the required fields (excluding guests) to generateHash
-      generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }).then(calculatedHash => {
+      // Only pass the required fields (including guests) to generateHash
+      generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
           // 추가: 예약번호 서버 확인
           const loading = document.getElementById("loadingOverlay");
@@ -277,10 +277,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function generateHash({ room, checkIn, checkOut, reservation, breakfastFlag }) {
+  async function generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }) {
     const secret = "HOTEL_ONLY_SECRET_KEY";
     // Include guests in the hash input
-    const data = `${room},${checkIn},${checkOut},${reservation},${breakfastFlag}`;
+    const data = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag}`;
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
