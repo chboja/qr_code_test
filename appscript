@@ -31,8 +31,12 @@ function handleBreakfastSubmit(e, callback) {
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("breakfast_list");
     if (!sheet) throw new Error("breakfast_list not found");
     Logger.log("🟡 조식 데이터 기록 시도:", e.parameter);
-    sheet.appendRow([e.parameter.timestamp, e.parameter.room, e.parameter.guests]);
-    Logger.log("🟢 appendRow 완료");
+    // Set number format of columns 1-3 to plain text before writing values
+    const lastRow = sheet.getLastRow() + 1;
+    const range = sheet.getRange(lastRow, 1, 1, 3);
+    range.setNumberFormat('@');
+    range.setValues([[e.parameter.timestamp, e.parameter.room, e.parameter.guests]]);
+    Logger.log("🟢 setValues 완료");
     return jsonpResponse(callback, { success: true });
   } catch (err) {
     Logger.log("❌ 조식 기록 에러:", err);
