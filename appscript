@@ -150,7 +150,15 @@ function handleImportCsv(e, callback) {
       return [reservation, room, name, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash, unpaid, memo];
     });
 
-    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+    // Set number format to plain text for columns 1, 3, 4, 5, 8, 10 before inserting values
+    const lastRow = sheet.getLastRow() + 1;
+    const numRows = rows.length;
+    const textColumns = [1, 3, 4, 5, 8, 10]; // 1-based column indices
+    textColumns.forEach(function(col) {
+      sheet.getRange(lastRow, col, numRows, 1).setNumberFormat('@');
+    });
+
+    sheet.getRange(lastRow, 1, numRows, rows[0].length).setValues(rows);
     return jsonpResponse(callback, { success: true, inserted: rows.length });
   } catch (err) {
     return jsonpResponse(callback, { success: false, error: err.message });
