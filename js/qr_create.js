@@ -249,23 +249,6 @@ window.handleJsonpResponse = function(response) {
   // You can handle post-upload feedback here if needed
 };
 
-// QRコード検証のJSONPコールバック
-window.handleVerifyResponse = function(response) {
-  console.log("🔍 QRコード検証結果:", response);
-  if (!response || typeof response.isValid === "undefined") {
-    alert("QRコードの検証に失敗しました。");
-    return;
-  }
-  if (response.isValid) {
-    if (response.breakfastFlag === 1) {
-      // Do nothing (table code removed)
-    } else {
-      alert("Room Onlyの部屋です。");
-    }
-  } else {
-    alert("QRコードが無効です。");
-  }
-};
 
 // 部屋番号検索のJSONPコールバック
 window.handleRoomSearchResult = function(response) {
