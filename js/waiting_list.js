@@ -279,12 +279,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }) {
     const secret = "HOTEL_ONLY_SECRET_KEY";
-    // Include guests in the hash input
     const data = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag}`;
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
-    // (아래에 아무것도 변경하지 않음)
   }
 
   Html5Qrcode.getCameras().then(devices => {
