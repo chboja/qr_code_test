@@ -320,7 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrText = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag},${hash}`;
 
     // ✅ 팝업 티켓 정보 표시
-    const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}<br>Booking No : ${reservation}`;
+    const breakfastTime = (breakfast === "O" || breakfast === "1") ? " (07:00~10:00)" : "";
+    const textInfo = `Room : ${room}<br>Check-in : ${checkIn}<br>Check-out : ${checkOut}(~10:00)<br>Guests : ${guests}<br>Breakfast : ${breakfast}${breakfastTime}<br>Booking No : ${reservation}`;
     document.getElementById("popupText").innerHTML = textInfo;
     const popupQR = document.getElementById("popupQR");
     popupQR.innerHTML = "";
