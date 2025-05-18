@@ -191,7 +191,18 @@ function fillFormWithData(data) {
   document.getElementById("guests").value = data.guestCount || "";
   document.getElementById("reservation").value = data.reservation || "";
   document.getElementById("payment").value = data.unpaid !== undefined ? String(data.unpaid) : "";
-  document.getElementById("breakfast").value = data.breakfastFlag === 1 ? "O" : data.breakfastFlag === 0 ? "X" : "";
+  // Set breakfast toggle
+  const breakfastHidden = document.getElementById("breakfastHidden");
+  const toggleOptions = document.querySelectorAll(".toggle-option");
+  let val = (data.breakfastFlag === 1 || data.breakfastFlag === "1") ? "O" : "X";
+  breakfastHidden.value = val;
+  toggleOptions.forEach(option => {
+    if (option.dataset.value === val) {
+      option.classList.add("active");
+    } else {
+      option.classList.remove("active");
+    }
+  });
   // Show alert popup if memo exists
   if (data.memo && data.memo.trim() !== "") {
     alert(`📌 メモ:\n${data.memo}`);
@@ -306,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const checkOut = document.getElementById("checkOut").value || "";
     const guests = document.getElementById("guests").value || "";
     const reservation = document.getElementById("reservation").value.trim() || "";
-    const breakfast = document.getElementById("breakfast")?.value.trim() || "";
+    const breakfast = document.getElementById("breakfastHidden")?.value || "";
 
     const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
     const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
@@ -531,3 +542,12 @@ function closeSelectPopup() {
   const optionList = document.getElementById("popupOptions");
   if (optionList) optionList.innerHTML = "";
 }
+  // ✅ 朝食トグルのクリック動作を追加
+  const toggleOptions = document.querySelectorAll(".toggle-option");
+  toggleOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      toggleOptions.forEach(o => o.classList.remove("active"));
+      option.classList.add("active");
+      document.getElementById("breakfastHidden").value = option.dataset.value;
+    });
+  });

@@ -47,8 +47,12 @@
 
         <label for="checkOut">チェックアウト日</label>
         <input type="date" id="checkOut" autocomplete="off" required>
-        <label for="breakfast">朝食</label>
-        <input type="text" id="breakfast" autocomplete="off" required>
+        <label>朝食</label>
+        <div class="breakfast-toggle">
+          <div class="toggle-option" data-value="O">O</div>
+          <div class="toggle-option" data-value="X">X</div>
+          <input type="hidden" name="breakfastOption" id="breakfastHidden" required>
+        </div>
 
         <label for="guests">宿泊人数</label>
         <input type="number" id="guests" min="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>

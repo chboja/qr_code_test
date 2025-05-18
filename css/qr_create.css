@@ -23,7 +23,7 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 400px;
-    box-sizing: border-box;
+    box-sizing: border-box; 
   }
   
   label {
@@ -249,4 +249,32 @@ h1 {
 
 #customSelectPopup ul li:hover {
   background-color: #f0f0f0;
+}
+/* Breakfast toggle styles */
+.breakfast-toggle {
+  display: flex;
+  border: 1px solid #aaa;
+  width: 120px;
+  height: 40px;
+  margin-bottom: 15px;
+}
+
+.toggle-option {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  border-right: 1px solid #ccc;
+}
+
+.toggle-option:last-child {
+  border-right: none;
+}
+
+.toggle-option.active {
+  background-color: #2e86de;
+  color: white;
 }

@@ -88,8 +88,9 @@ function handleSearchByName(e, callback) {
       checkOut: row[4],
       guestCount: row[5],
       breakfastFlag: row[6],
-      unpaid: row[7],
-      memo: row[8]
+      searchName: row[7],
+      unpaid: row[8],
+      memo: row[9]
     }));
     return jsonpResponse(callback, { success: true, matches });
   } catch (err) {
@@ -115,8 +116,9 @@ function handleSearchByRoom(e, callback) {
       checkOut: row[4],
       guestCount: row[5],
       breakfastFlag: row[6],
-      unpaid: row[7],
-      memo: row[8]
+      searchName: row[7],
+      unpaid: row[8],
+      memo: row[9]
     }));
     return jsonpResponse(callback, { success: true, matches });
   } catch (err) {
