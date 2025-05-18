@@ -50,4 +50,36 @@ function handleStatsResponse(response) {
   console.log("총 이용객 수:", guestSum);
   console.log("총 일수:", dateDiff);
   console.log("일평균 이용객 수:", guestAvg);
+
+  // 시간대 범위 정의
+  const timeRanges = [
+    { label: "06:30 ~ 07:00", start: "06:30", end: "07:00", total: 0 },
+    { label: "07:00 ~ 07:30", start: "07:00", end: "07:30", total: 0 },
+    { label: "07:30 ~ 08:00", start: "07:30", end: "08:00", total: 0 },
+    { label: "08:00 ~ 08:30", start: "08:00", end: "08:30", total: 0 },
+    { label: "08:30 ~ 09:00", start: "08:30", end: "09:00", total: 0 },
+    { label: "09:00 ~ 09:30", start: "09:00", end: "09:30", total: 0 },
+    { label: "09:30 ~ 10:00", start: "09:30", end: "10:30", total: 0 }
+  ];
+
+  // 시간대별 합계 계산
+  response.rows.forEach(row => {
+    const fullTimestamp = row.timestamp || ""; // "YYYY-MM-DD HH:MM"
+    const time = fullTimestamp.split(" ")[1];
+    if (!time) return;
+
+    for (const range of timeRanges) {
+      if (time >= range.start && time < range.end) {
+        range.total += row.guests;
+        break;
+      }
+    }
+  });
+
+  // 시간대별 평균 출력
+  console.log("📊 시간대별 통계:");
+  timeRanges.forEach(range => {
+    const avg = Math.round(range.total / dateDiff);
+    console.log(`${range.label} → 총합: ${range.total}명, 일평균: ${avg}명`);
+  });
 }
