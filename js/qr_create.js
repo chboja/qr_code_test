@@ -350,11 +350,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   nameInput.addEventListener("input", (e) => {
     if (!window.wanakana || !wanakana.toKatakana) return;
-    const input = normalize(kanaFullToHalf(wanakana.toKatakana(e.target.value || "")));
+    const rawInput = e.target.value || "";
+    const katakanaInput = normalize(kanaFullToHalf(wanakana.toKatakana(rawInput)));
+    const romajiInput = normalize(wanakana.toRomaji(rawInput));
+    const searchInputs = [katakanaInput, romajiInput];
     const matchMap = {};
 
     cachedNameList.forEach(({ name, searchName }) => {
-      if (searchName && searchName.includes(input)) {
+      if (searchName && searchInputs.some(inp => searchName.includes(inp))) {
         if (!matchMap[name]) matchMap[name] = 0;
         matchMap[name]++;
       }
@@ -468,11 +471,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // ✅ 입력 외의 영역을 터치하면 키보드 닫기
   document.addEventListener("touchstart", (e) => {
     const active = document.activeElement;
+    const suggestionBox = document.getElementById("nameSuggestionBox");
+    const isTouchingSuggestion = suggestionBox && suggestionBox.contains(e.target);
+  
     if (
       active &&
       (active.tagName === "INPUT" || active.tagName === "TEXTAREA") &&
       !e.target.closest("input") &&
-      !e.target.closest("textarea")
+      !e.target.closest("textarea") &&
+      !isTouchingSuggestion
     ) {
       active.blur();
     }
