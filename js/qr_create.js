@@ -47,7 +47,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbyRnR1Sg-XzzOERF0vapGvi9sUlr8VfMLMvJecnUm2j6vnLgODsvgKiW1_ooC3wcHBPvA/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbzSBix_3bD17ZT_pZaGND3TwFf65CEeZEj5JUw7dYV_5t3HSWxx2TY6avKr6D8u5_IfKw/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
@@ -455,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rawUnpaid = row["未収金"]?.trim() || "";
                 const unpaid = rawUnpaid === "なし" ? "0" : rawUnpaid;
                 const memo = (row["メモ"] ?? "").trim().replace(/,/g, '、');
-                return [reservation, room, reserver, checkIn, checkOut, guestCount, breakfastFlag, searchName, hash.slice(0, 8), unpaid, memo];
+                return [reservation, room, reserver, checkIn, checkOut, guestCount, breakfastFlag, searchName, unpaid, memo];
               }));
 
             console.log("📊 JSONP 전送用 문자열 배열 (with searchName):", compacted);
