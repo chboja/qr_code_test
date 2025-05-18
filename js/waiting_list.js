@@ -152,11 +152,15 @@ document.addEventListener("DOMContentLoaded", () => {
           guests: guests,
           timestamp: timestamp
         });
+        const query = new URLSearchParams({
+          mode: "breakfastSubmit",
+          callback: "handlePostResponse",
+          room: roomNum,
+          guests: guests,
+          timestamp: timestamp
+        });
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
-          + `&room=${encodeURIComponent(roomNum)}`
-          + `&guests=${encodeURIComponent(guests)}`
-          + `&timestamp=${encodeURIComponent(timestamp)}`;
+        jsonpScript.src = `${SCRIPT_BASE_URL}?${query.toString()}`;
         document.body.appendChild(jsonpScript);
         // Restart QR scanner immediately after processing button click
         restartQrScanner();
@@ -408,11 +412,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 guests: guests,
                 timestamp: timestamp
               });
+              const query = new URLSearchParams({
+                mode: "breakfastSubmit",
+                callback: "handlePostResponse",
+                room: roomNum,
+                guests: guests,
+                timestamp: timestamp
+              });
               const jsonpScript = document.createElement("script");
-              jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
-                + `&room=${encodeURIComponent(roomNum)}`
-                + `&guests=${encodeURIComponent(guests)}`
-                + `&timestamp=${encodeURIComponent(timestamp)}`;
+              jsonpScript.src = `${SCRIPT_BASE_URL}?${query.toString()}`;
               document.body.appendChild(jsonpScript);
             }
           };
@@ -568,11 +576,15 @@ document.addEventListener("DOMContentLoaded", () => {
           guests: guests,
           timestamp: timestamp
         });
+        const query = new URLSearchParams({
+          mode: "breakfastSubmit",
+          callback: "handlePostResponse",
+          room: roomNum,
+          guests: guests,
+          timestamp: timestamp
+        });
         const jsonpScript = document.createElement("script");
-        jsonpScript.src = `${SCRIPT_BASE_URL}?callback=handlePostResponse&mode=breakfastSubmit`
-          + `&room=${encodeURIComponent(roomNum)}`
-          + `&guests=${encodeURIComponent(guests)}`
-          + `&timestamp=${encodeURIComponent(timestamp)}`;
+        jsonpScript.src = `${SCRIPT_BASE_URL}?${query.toString()}`;
         document.body.appendChild(jsonpScript);
       }
     };
