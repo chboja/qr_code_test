@@ -202,7 +202,7 @@ function toHalfWidthKana(str) {
   });
 }
 
-const normalize = str => toHalfWidth(str).toLowerCase().replace(/\s+/g, "");
+const normalize = str => toHalfWidth(str).toLowerCase();
 
 function fillFormWithData(data) {
   console.log("🧾 fillFormWithData:", data);
