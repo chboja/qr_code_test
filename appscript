@@ -23,6 +23,8 @@ function doGet(e) {
       return handleImportCsv(e, callback);
     case "fetchStats":
       return handleFetchStats(e, callback);
+    case "guestNameList":
+      return handleGuestNameList(e, callback);
     default:
       return handleDefault(e, callback);
   }
@@ -197,6 +199,20 @@ function handleFetchStats(e, callback) {
       success: true,
       rows: results
     });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
+  }
+}
+
+function handleGuestNameList(e, callback) {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
+    const data = sheet.getDataRange().getValues();
+    const list = data.slice(1).map(row => ({
+      name: row[2] || "",
+      searchName: (row[7] || "").toLowerCase()
+    }));
+    return jsonpResponse(callback, { success: true, list });
   } catch (err) {
     return jsonpResponse(callback, { success: false, error: err.message });
   }

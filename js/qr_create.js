@@ -1,3 +1,22 @@
+// --- Name suggestion feature: guest name list fetch and suggestion box ---
+let cachedNameList = [];
+
+function fetchGuestNameList() {
+  const script = document.createElement("script");
+  const callback = "handleGuestNameList";
+  const query = `mode=guestNameList&callback=${callback}`;
+  script.src = `${getSheetApiUrl()}?${query}`;
+  document.body.appendChild(script);
+}
+
+window.handleGuestNameList = function(response) {
+  if (response.success && Array.isArray(response.list)) {
+    cachedNameList = response.list;
+    console.log("✅ 이름 목록 불러오기 완료:", cachedNameList);
+  } else {
+    console.error("❌ 이름 목록 오류", response.error);
+  }
+};
 
 
 // --- Overlay helpers for search (name/room) ---
@@ -47,7 +66,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbw9d5HMBvkJQLNyjv-sLUk55G_468oJxD2PIOGXs4pn4HVUIk-eLxOPrr0pOc8GPhwOhQ/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycby-QR48fqCxSfGK2yXMgyhXL1ANvNya9ky-cdHCZ5m7Mex9sF6xGUfsNiTAoMBsbxa70A/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
@@ -83,6 +102,9 @@ function kanaFullToHalf(str){
 }
 
 wanakanaScript.onload = () => {
+  // --- Fetch guest name list for suggestions on page load ---
+  fetchGuestNameList();
+
   const searchBtName = document.getElementById("searchBtName");
   if (searchBtName) {
     searchBtName.addEventListener("click", () => {
@@ -307,6 +329,72 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("checkIn").value = `${yyyy}-${mm}-${dd}`;
 
   const form = document.getElementById("qrForm");
+
+  // --- Name input suggestion feature ---
+  const nameInput = document.getElementById("name");
+  // Suggestion box setup
+  const suggestionBox = document.createElement("ul");
+  suggestionBox.id = "nameSuggestionBox";
+  suggestionBox.style.position = "absolute";
+  suggestionBox.style.zIndex = "10000";
+  suggestionBox.style.background = "#fff";
+  suggestionBox.style.border = "1px solid #ccc";
+  suggestionBox.style.listStyle = "none";
+  suggestionBox.style.padding = "0";
+  suggestionBox.style.margin = "0";
+  suggestionBox.style.maxHeight = "150px";
+  suggestionBox.style.overflowY = "auto";
+  suggestionBox.style.width = nameInput.offsetWidth + "px";
+  suggestionBox.style.display = "none";
+  document.body.appendChild(suggestionBox);
+
+  nameInput.addEventListener("input", (e) => {
+    if (!window.wanakana || !wanakana.toKatakana) return;
+    const input = normalize(kanaFullToHalf(wanakana.toKatakana(e.target.value || "")));
+    const matchMap = {};
+
+    cachedNameList.forEach(({ name, searchName }) => {
+      if (searchName && searchName.includes(input)) {
+        if (!matchMap[name]) matchMap[name] = 0;
+        matchMap[name]++;
+      }
+    });
+
+    const entries = Object.entries(matchMap);
+    const limitedEntries = entries.slice(0, 5);
+    if (limitedEntries.length === 0) {
+      suggestionBox.style.display = "none";
+      return;
+    }
+
+    suggestionBox.innerHTML = "";
+    limitedEntries.forEach(([name, count]) => {
+      const li = document.createElement("li");
+      li.style.padding = "6px 10px";
+      li.style.cursor = "pointer";
+      li.textContent = count > 1 ? `${name} (${count})` : name;
+      li.addEventListener("click", () => {
+        nameInput.value = name;
+        suggestionBox.style.display = "none";
+        const searchBtName = document.getElementById("searchBtName");
+        if (searchBtName) searchBtName.click();
+      });
+      suggestionBox.appendChild(li);
+    });
+
+    const rect = nameInput.getBoundingClientRect();
+    suggestionBox.style.top = rect.bottom + window.scrollY + "px";
+    suggestionBox.style.left = rect.left + window.scrollX + "px";
+    suggestionBox.style.width = rect.width + "px";
+    suggestionBox.style.display = "block";
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!suggestionBox.contains(e.target) && e.target !== nameInput) {
+      suggestionBox.style.display = "none";
+    }
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     document.querySelectorAll("input").forEach(el => el.blur());
@@ -354,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ✅ 이름 입력창에서 Enter 시 검색 버튼 클릭 (폼 제출 방지)
-  const nameInput = document.getElementById("name");
   if (nameInput) {
     nameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
