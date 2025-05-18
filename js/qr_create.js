@@ -30,7 +30,7 @@ function removeSearchOverlay() {
 // --- generateHash function (standalone, not imported) ---
 async function generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag) {
   const secret = "HOTEL_ONLY_SECRET_KEY";
-  const data = `${room},${checkIn},${checkOut},${reservation},${breakfastFlag}`;
+  const data = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag}`;
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
