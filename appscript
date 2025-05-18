@@ -189,7 +189,7 @@ function handleFetchStats(e, callback) {
       if (!timestamp || !room || !guests) continue;
       const date = timestamp.split(" ")[0];
       if (date >= startDate && date <= endDate) {
-        results.push({ date, room, guests: Number(guests) });
+        results.push({ timestamp, date, room, guests: Number(guests) });
       }
     }
 
