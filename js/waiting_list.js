@@ -77,21 +77,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastScannedTime = 0;
   // --- Reusable QR scanner restart function ---
   function restartQrScanner() {
-    html5QrCode.stop().then(() => {
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      );
-    }).catch(err => {
-      console.error("QRスキャナ再起動エラー:", err);
+    html5QrCode.start(
+      { facingMode: "user" },
+      {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const boxSize = Math.floor(minEdge * 0.7);
+          return { width: boxSize, height: boxSize };
+        }
+      },
+      onScanSuccess
+    ).catch(err => {
+      console.error("QRスキャナ起動エラー:", err);
     });
   }
   document.getElementById("loadingOverlay").style.display = "none";
@@ -181,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     lastScannedText = decodedText;
     lastScannedTime = now;
-    // html5QrCode.pause(); // 중복 스캔 방지 (비활성화)
+    // Ensure QR scanner is always running; do not stop or pause here
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
