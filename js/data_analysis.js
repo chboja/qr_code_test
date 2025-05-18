@@ -34,40 +34,6 @@ function handleStatsResponse(response) {
 
   console.log("✅ 통계 데이터:", response);
 
-  const container = document.getElementById("stats-container");
-  container.innerHTML = "";
-
-  if (response.rows.length === 0) {
-    container.innerHTML = "<p>해당 기간에 데이터가 없습니다.</p>";
-    return;
-  }
-
-  const table = document.createElement("table");
-  table.border = "1";
-  table.cellPadding = "6";
-  table.style.borderCollapse = "collapse";
-
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr>
-      <th>날짜</th>
-      <th>방 번호</th>
-      <th>인원 수</th>
-    </tr>`;
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-  response.rows.forEach(row => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${row.date}</td>
-      <td>${row.room}</td>
-      <td>${row.guests}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  container.appendChild(table);
 
   // 총 이용객 수 계산
   const guestSum = response.rows.reduce((sum, row) => sum + row.guests, 0);
@@ -79,10 +45,6 @@ function handleStatsResponse(response) {
 
   // 일평균 계산
   const guestAvg = Math.round(guestSum / dateDiff);
-
-  // HTML 출력 비활성화
-  // document.getElementById("sum-guest").textContent = guestSum;
-  // document.getElementById("avg-guest").textContent = guestAvg;
 
   // 디버그 로그 출력
   console.log("총 이용객 수:", guestSum);
