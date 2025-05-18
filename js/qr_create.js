@@ -124,7 +124,7 @@ wanakanaScript.onload = () => {
         // --- Logging for name search JSONP ---
         console.log("📤 Sending search term to GAS:", term);
         const script = document.createElement("script");
-        script.src = `${getSheetApiUrl()}?callback=handleSearchResult&name=${encodeURIComponent(term)}`;
+        script.src = `${getSheetApiUrl()}?mode=searchName&callback=handleSearchResult&name=${encodeURIComponent(term)}`;
         console.log("📤 Full script URL:", script.src);
         document.body.appendChild(script);
       });
@@ -149,7 +149,7 @@ wanakanaScript.onload = () => {
       // --- Logging for room search JSONP ---
       console.log("📤 Sending room term to GAS:", searchTerm);
       const script = document.createElement("script");
-      script.src = `${getSheetApiUrl()}?callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
+      script.src = `${getSheetApiUrl()}?mode=searchRoom&callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
       console.log("📤 Full script URL:", script.src);
       document.body.appendChild(script);
     });
