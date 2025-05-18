@@ -46,6 +46,13 @@ function handleVerifyReservation(e, callback) {
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
     if (!sheet) throw new Error("guest_list not found");
     const data = sheet.getDataRange().getValues();
+    // Collect logs for response
+    const logs = [];
+    logs.push("🔍 확인할 예약번호 (from JS): '" + reservationToVerify + "'");
+    for (let i = 1; i < data.length; i++) {
+      const reservation = String(data[i][0]).trim().toLowerCase();
+      logs.push("🔎 row[" + i + "]: '" + reservation + "'");
+    }
     const match = data.find((row, index) =>
       index !== 0 && String(row[0]).trim().toLowerCase() === reservationToVerify
     );
@@ -53,7 +60,10 @@ function handleVerifyReservation(e, callback) {
     return jsonpResponse(callback, {
       success: true,
       exists: !!match,
-      breakfastFlag
+      reservationToVerify,
+      matchedReservation: match ? String(match[0]) : null,
+      breakfastFlag,
+      logs
     });
   } catch (err) {
     return jsonpResponse(callback, { success: false, error: err.message });

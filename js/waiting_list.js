@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwanjNroXCy5CtLtk973OvY1WUfLTKmYPt_lIkFmi8iuq9gfiQ4eDgrBqiJdJhgOOZY5A/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbyRnR1Sg-XzzOERF0vapGvi9sUlr8VfMLMvJecnUm2j6vnLgODsvgKiW1_ooC3wcHBPvA/exec";
 document.addEventListener("DOMContentLoaded", () => {
   // --- Message strings for alerts ---
   const messages = {
@@ -200,6 +200,14 @@ document.addEventListener("DOMContentLoaded", () => {
               if (loading) loading.style.display = "none";
               const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
               const result = JSON.parse(jsonText);
+
+              // 🟡 Show GAS logs
+              if (result.logs && Array.isArray(result.logs)) {
+                result.logs.forEach(log => {
+                  logDebug("🔍 GAS: " + log);
+                });
+              }
+
               if (result.success && result.exists) {
                 if (breakfastFlag === "1") {
                   // Check if room already exists in localStorage with status "1"
