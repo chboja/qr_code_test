@@ -21,6 +21,8 @@ function doGet(e) {
       return handleSearchByRoom(e, callback);
     case "importCsv":
       return handleImportCsv(e, callback);
+    case "fetchStats":
+      return handleFetchStats(e, callback);
     default:
       return handleDefault(e, callback);
   }
@@ -170,4 +172,32 @@ function handleImportCsv(e, callback) {
 
 function handleDefault(e, callback) {
   return jsonpResponse(callback, { success: false, error: "Invalid mode or missing parameters" });
+}
+
+function handleFetchStats(e, callback) {
+  try {
+    const startDate = e.parameter.startDate;
+    const endDate = e.parameter.endDate;
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("breakfast_list");
+    if (!sheet) throw new Error("breakfast_list not found");
+
+    const data = sheet.getDataRange().getValues();
+    const results = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const [timestamp, room, guests] = data[i];
+      if (!timestamp || !room || !guests) continue;
+      const date = timestamp.split(" ")[0];
+      if (date >= startDate && date <= endDate) {
+        results.push({ date, room, guests: Number(guests) });
+      }
+    }
+
+    return jsonpResponse(callback, {
+      success: true,
+      rows: results
+    });
+  } catch (err) {
+    return jsonpResponse(callback, { success: false, error: err.message });
+  }
 }
