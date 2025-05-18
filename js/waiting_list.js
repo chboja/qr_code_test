@@ -189,6 +189,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (parts.length === 7) {
       // Destructure in the correct order including guests
       const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+
+      // Room Onlyチェックを先に行う
+      if (breakfastFlag !== "1") {
+        showCustomAlert(`${room}号は${messages.roomOnly.ja}\n${messages.roomOnly.en}`);
+        lastScannedText = "";
+        return;
+      }
+
       // Only pass the required fields (including guests) to generateHash
       generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
         if (calculatedHash === hashFromQR) {
@@ -211,54 +219,49 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (result.success && result.exists) {
-                if (breakfastFlag === "1") {
-                  // Check if room already exists in localStorage with status "1"
-                  const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-                  const existing = localData.find(entry => entry.split(",")[0] === room);
-                  if (existing && existing.split(",")[3] === "1") {
-                    lastScannedText = "";
-                    showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
-                    return;
-                  }
-                  window.currentRoomText = room;
-                  window.maxGuestsFromQR = parseInt(guests);
-                  document.getElementById("guestCountInput").value = guests;
-                  document.getElementById("customPromptOverlay").style.display = "flex";
-                  // Set prompt message in Japanese and English (2 lines)
-                  var promptLabel = document.getElementById("customPromptLabel");
-                  if (promptLabel) {
-                    promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
-                  }
-                  // Set custom prompt button labels (2 lines, Japanese + English)
-                  var cancelBtn = document.getElementById("customPromptCancel");
-                  var confirmBtn = document.getElementById("customPromptConfirm");
-                  if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
-                  if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
-                  document.getElementById("guestCountInput").focus();
-
-                  // + / - 버튼 이벤트 바인딩
-                  const inputEl = document.getElementById("guestCountInput");
-                  const decreaseBtn = document.getElementById("decreaseGuestBtn");
-                  const increaseBtn = document.getElementById("increaseGuestBtn");
-
-                  decreaseBtn.onclick = () => {
-                    let val = parseInt(inputEl.value) || 1;
-                    if (val > 1) inputEl.value = val - 1;
-                  };
-
-                  increaseBtn.onclick = () => {
-                    let val = parseInt(inputEl.value) || 1;
-                    const max = window.maxGuestsFromQR || 10;
-                    if (val < max) inputEl.value = val + 1;
-                  };
-
-                  // Save to localStorage
-                  const formattedTime = getCurrentFormattedTime();
-                  updateLocalStorageEntry(room, guests, formattedTime, "0");
-                } else {
+                // Check if room already exists in localStorage with status "1"
+                const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+                const existing = localData.find(entry => entry.split(",")[0] === room);
+                if (existing && existing.split(",")[3] === "1") {
                   lastScannedText = "";
-                  showCustomAlert(`${room}号は${messages.roomOnly.ja}\n${messages.roomOnly.en}`);
+                  showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
+                  return;
                 }
+                window.currentRoomText = room;
+                window.maxGuestsFromQR = parseInt(guests);
+                document.getElementById("guestCountInput").value = guests;
+                document.getElementById("customPromptOverlay").style.display = "flex";
+                // Set prompt message in Japanese and English (2 lines)
+                var promptLabel = document.getElementById("customPromptLabel");
+                if (promptLabel) {
+                  promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+                }
+                // Set custom prompt button labels (2 lines, Japanese + English)
+                var cancelBtn = document.getElementById("customPromptCancel");
+                var confirmBtn = document.getElementById("customPromptConfirm");
+                if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
+                if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
+                document.getElementById("guestCountInput").focus();
+
+                // + / - 버튼 이벤트 바인딩
+                const inputEl = document.getElementById("guestCountInput");
+                const decreaseBtn = document.getElementById("decreaseGuestBtn");
+                const increaseBtn = document.getElementById("increaseGuestBtn");
+
+                decreaseBtn.onclick = () => {
+                  let val = parseInt(inputEl.value) || 1;
+                  if (val > 1) inputEl.value = val - 1;
+                };
+
+                increaseBtn.onclick = () => {
+                  let val = parseInt(inputEl.value) || 1;
+                  const max = window.maxGuestsFromQR || 10;
+                  if (val < max) inputEl.value = val + 1;
+                };
+
+                // Save to localStorage
+                const formattedTime = getCurrentFormattedTime();
+                updateLocalStorageEntry(room, guests, formattedTime, "0");
               } else {
                 console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
                 // Resume QR scanning after alert (with delay for iOS/Safari)
