@@ -121,8 +121,11 @@ wanakanaScript.onload = () => {
       foundResults = [];
 
       searchTerms.forEach(term => {
+        // --- Logging for name search JSONP ---
+        console.log("📤 Sending search term to GAS:", term);
         const script = document.createElement("script");
         script.src = `${getSheetApiUrl()}?callback=handleSearchResult&name=${encodeURIComponent(term)}`;
+        console.log("📤 Full script URL:", script.src);
         document.body.appendChild(script);
       });
     });
@@ -143,8 +146,11 @@ wanakanaScript.onload = () => {
 
       showSearchOverlay();
       const searchTerm = normalize(baseInput);
+      // --- Logging for room search JSONP ---
+      console.log("📤 Sending room term to GAS:", searchTerm);
       const script = document.createElement("script");
       script.src = `${getSheetApiUrl()}?callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
+      console.log("📤 Full script URL:", script.src);
       document.body.appendChild(script);
     });
   }

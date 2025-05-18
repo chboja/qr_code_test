@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // 추가: 예약번호 서버 확인
           const loading = document.getElementById("loadingOverlay");
           if (loading) loading.style.display = "flex";
-          fetch(`${SCRIPT_BASE_URL}?verifyReservation=${reservation}&callback=verifyCallback`)
+          fetch(`${SCRIPT_BASE_URL}?mode=verifyReservation&verifyReservation=${reservation}&callback=verifyCallback`)
             .then(response => response.text())
             .then(text => {
               const loading = document.getElementById("loadingOverlay");
