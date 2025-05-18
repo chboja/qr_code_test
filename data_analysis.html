@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>데이터 분석</title>
+  <link rel="stylesheet" href="css/data_analysis.css">
+</head>
+<body>
+  <main class="admin-content">
+    <!-- 통계 페이지 -->
+    <section id="page-stats">
+      <h2 style="margin-bottom: 20px;">📊 데이터 분석 페이지</h2>
+      <div class="stats-controls" style="margin-bottom: 12px;">
+        <label for="stats-start-date">시작 날짜:</label>
+        <input type="date" id="stats-start-date">
+        <label for="stats-end-date" style="margin-left: 12px;">종료 날짜:</label>
+        <input type="date" id="stats-end-date">
+        <button id="stats-search-button" class="search-button" style="margin-left: 12px;" data-context="stats">검색</button>
+        <button id="stats-details-button" class="edit-button" style="margin-left: 6px;">자세히 보기</button>
+      </div>
+      <div id="stats-container"></div>
+      <div id="stats-result" style="margin-top: 20px;"></div>
+      <div id="stats-summary-container" style="margin-top: 20px;">
+        <h3>요약 통계</h3>
+        <table id="stats-summary-table" border="1" cellpadding="6" style="border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>총합 (room_only)</th>
+              <th>총합 (done)</th>
+              <th>총합 (guest_nm)</th>
+              <th>일평균 (room_only)</th>
+              <th>일평균 (done)</th>
+              <th>일평균 (guest_nm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="sum-room-only">-</td>
+              <td id="sum-done">-</td>
+              <td id="sum-guest">-</td>
+              <td id="avg-room-only">-</td>
+              <td id="avg-done">-</td>
+              <td id="avg-guest">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="stats-time-range-container" style="margin-top: 20px;">
+        <h3>시간대별 평균 대기 시간 및 데이터 수</h3>
+        <table id="time-range-table" border="1" cellpadding="6" style="border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>시간대</th>
+              <th>done</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 이 부분은 JS에서 동적으로 채움 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="js/data_analysis.js"></script>
+</body>
+</html>
