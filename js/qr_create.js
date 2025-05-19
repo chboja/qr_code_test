@@ -6,7 +6,7 @@ function fetchGuestNameList() {
   const callback = "handleGuestNameList";
   const query = `mode=guestNameList&callback=${callback}`;
   script.src = `${getSheetApiUrl()}?${query}`;
-  showSearchOverlay();
+  showUpdatingOverlay();
   document.body.appendChild(script);
 }
 
