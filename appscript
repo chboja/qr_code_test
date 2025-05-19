@@ -49,7 +49,7 @@ function handleBreakfastSubmit(e, callback) {
 
 function handleVerifyReservation(e, callback) {
   try {
-    const reservationToVerify = e.parameter.verifyReservation.trim().toLowerCase();
+    const reservationToVerify = e.parameter.verifyReservation.trim().toLowerCase().split(/[-_]/)[0];
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
     if (!sheet) throw new Error("guest_list not found");
     const data = sheet.getDataRange().getValues();
@@ -60,9 +60,11 @@ function handleVerifyReservation(e, callback) {
       const reservation = String(data[i][0]).trim().toLowerCase();
       logs.push("🔎 row[" + i + "]: '" + reservation + "'");
     }
-    const match = data.find((row, index) =>
-      index !== 0 && String(row[0]).trim().toLowerCase() === reservationToVerify
-    );
+    const match = data.find((row, index) => {
+      if (index === 0) return false;
+      const rowReservation = String(row[0]).trim().toLowerCase().split(/[-_]/)[0];
+      return rowReservation === reservationToVerify;
+    });
     const breakfastFlag = match ? String(match[6]) : null;
     return jsonpResponse(callback, {
       success: true,

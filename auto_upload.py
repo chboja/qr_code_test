@@ -148,7 +148,7 @@ def process_and_upload():
         .tolist()
     )
 
-    GAS_URL = "https://script.google.com/macros/s/AKfycbygHjNroBxYb3Qs8Z5Kt4UZTYJfT08KUrYgxHIv2dczJyFKTM-KJT-Zm0jXgEnuXM4Fyw/exec"
+    GAS_URL = "https://script.google.com/macros/s/AKfycbw7b5RGYeP5nNI5m5cb5sU8zvygyL2cvvKwuZrcd6_VPn7Qoj5nYeyw5Pn4nvCyrCSWMw/exec"
     upload_payload = {
         "rows": [row.split(",") for row in rows],
         "roomOnly": ",".join(room_only_rooms)

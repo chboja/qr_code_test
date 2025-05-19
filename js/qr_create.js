@@ -79,7 +79,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbygHjNroBxYb3Qs8Z5Kt4UZTYJfT08KUrYgxHIv2dczJyFKTM-KJT-Zm0jXgEnuXM4Fyw/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbw7b5RGYeP5nNI5m5cb5sU8zvygyL2cvvKwuZrcd6_VPn7Qoj5nYeyw5Pn4nvCyrCSWMw/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
@@ -241,7 +241,10 @@ function fillFormWithData(data) {
   document.getElementById("checkIn").value = data.checkIn || "";
   document.getElementById("checkOut").value = data.checkOut || "";
   document.getElementById("guests").value = data.guestCount || "";
-  document.getElementById("reservation").value = data.reservation || "";
+  // Reservation: only use part before '-' or '_'
+  const rawReservation = data.reservation || "";
+  const cleanedReservation = rawReservation.split(/[-_]/)[0];
+  document.getElementById("reservation").value = cleanedReservation;
   document.getElementById("payment").value = data.unpaid !== undefined ? String(data.unpaid) : "";
   // Set breakfast toggle
   const breakfastHidden = document.getElementById("breakfastHidden");
