@@ -10,9 +10,9 @@ import requests
 def show_working_window():
     global root
     root = tk.Tk()
-    root.title("처리 중")
+    root.title("更新中")
     root.geometry("300x100")
-    label = tk.Label(root, text="고객 정보 갱신 중...", font=("Arial", 14))
+    label = tk.Label(root, text="顧客情報を更新中...", font=("Arial", 14))
     label.pack(expand=True)
     root.attributes('-topmost', True)
     root.after(100, start_upload_thread)
@@ -47,7 +47,7 @@ def process_and_upload():
         filetypes=[("CSV 파일", "*.csv")]
     )
     if not csv_file_path:
-        show_message("오류", "CSV 파일이 선택되지 않았습니다.")
+        show_message("エラー", "CSVファイルが選択されていません。")
         root.quit()
         return
 
@@ -103,7 +103,7 @@ def process_and_upload():
         .tolist()
     )
 
-    GAS_URL = "https://script.google.com/macros/s/AKfycbzU62BxuaeENDC0NScvkRCsEwi7yWOWML4ZSLdnQztQLHjSRmXe8hyzLJBX0hhl28xFpg/exec"
+    GAS_URL = "https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec"
     upload_payload = {
         "rows": [row.split(",") for row in rows],
         "roomOnly": ",".join(room_only_rooms)
@@ -117,12 +117,12 @@ def process_and_upload():
         print("📥 응답 코드:", response.status_code)
         print("📥 응답 텍스트:", response.text)
         if response.status_code == 200:
-            show_message("성공", "✅ 구글시트 업로드 완료!")
+            show_message("成功", "✅ Googleスプレッドシートへのアップロードが完了しました！")
         else:
-            show_message("실패", f"❌ 상태 코드: {response.status_code}")
+            show_message("失敗", f"❌ ステータスコード: {response.status_code}")
     except Exception as e:
         print("❌ 업로드 실패:", e)
-        show_message("에러", f"❌ 요청 실패: {e}")
+        show_message("エラー", f"❌ リクエスト失敗: {e}")
     finally:
         root.quit()
 

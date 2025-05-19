@@ -6,6 +6,7 @@ function fetchGuestNameList() {
   const callback = "handleGuestNameList";
   const query = `mode=guestNameList&callback=${callback}`;
   script.src = `${getSheetApiUrl()}?${query}`;
+  showSearchOverlay();
   document.body.appendChild(script);
 }
 
@@ -16,11 +17,12 @@ window.handleGuestNameList = function(response) {
   } else {
     console.error("❌ 이름 목록 오류", response.error);
   }
+  removeSearchOverlay();
 };
 
 
 // --- Overlay helpers for search (name/room) ---
-function showSearchOverlay() {
+function createOverlayWithText(text) {
   const overlay = document.createElement("div");
   overlay.id = "searchOverlay";
   overlay.style.position = "fixed";
@@ -35,8 +37,16 @@ function showSearchOverlay() {
   overlay.style.zIndex = "9999";
   overlay.style.color = "white";
   overlay.style.fontSize = "24px";
-  overlay.textContent = "検索中…";
+  overlay.textContent = text;
   document.body.appendChild(overlay);
+}
+
+function showSearchOverlay() {
+  createOverlayWithText("検索中…");
+}
+
+function showUpdatingOverlay() {
+  createOverlayWithText("更新中…");
 }
 
 function removeSearchOverlay() {
@@ -66,7 +76,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbzU62BxuaeENDC0NScvkRCsEwi7yWOWML4ZSLdnQztQLHjSRmXe8hyzLJBX0hhl28xFpg/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);

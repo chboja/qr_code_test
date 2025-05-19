@@ -188,9 +188,12 @@ function handleStatsResponse(response) {
     const blob = new Blob([wbout], { type: "application/octet-stream" });
     const blobUrl = URL.createObjectURL(blob);
 
-    const previewWindow = window.open(blobUrl);
-    if (!previewWindow) {
-      alert("ポップアップがブロックされました。手動で許可してください。");
-    }
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
   };
 }
