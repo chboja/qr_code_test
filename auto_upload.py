@@ -42,7 +42,7 @@ def process_and_upload():
         "download.prompt_for_download": False,
         "directory_upgrade": True
     })
-    # options.add_argument("--headless")  # UI 없이 실행할 경우
+    options.add_argument("--headless=new")  # UI 없이 실행
 
     driver = webdriver.Chrome(options=options)
 
