@@ -117,7 +117,7 @@ def process_and_upload():
         print("📥 응답 코드:", response.status_code)
         print("📥 응답 텍스트:", response.text)
         if response.status_code == 200:
-            show_message("成功", "✅ Googleスプレッドシートへのアップロードが完了しました！")
+            show_message("成功", "お客様情報を更新しました。")
         else:
             show_message("失敗", f"❌ ステータスコード: {response.status_code}")
     except Exception as e:
