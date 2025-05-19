@@ -180,12 +180,31 @@ function handleFetchStats(e, callback) {
   try {
     const startDate = e.parameter.startDate;
     const endDate = e.parameter.endDate;
+
+    // 🔄 Clean old data in breakfast_list
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    const breakfastSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("breakfast_list");
+    const breakfastData = breakfastSheet.getDataRange().getValues();
+    const breakfastHeader = breakfastData[0];
+    const breakfastRowsToKeep = [breakfastHeader];
+    for (let i = 1; i < breakfastData.length; i++) {
+      const [timestamp, room, guests] = breakfastData[i];
+      if (!timestamp || !room || !guests) continue;
+      const ts = new Date(timestamp);
+      const hour = ts.getHours() + ts.getMinutes() / 60;
+      if (ts >= threeMonthsAgo && hour >= 6 && hour <= 11) {
+        breakfastRowsToKeep.push(breakfastData[i]);
+      }
+    }
+    breakfastSheet.clearContents();
+    breakfastSheet.getRange(1, 1, breakfastRowsToKeep.length, breakfastHeader.length).setValues(breakfastRowsToKeep);
+
+    // Now get the cleaned breakfast_list data for stats
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("breakfast_list");
     if (!sheet) throw new Error("breakfast_list not found");
-
     const data = sheet.getDataRange().getValues();
     const results = [];
-
     for (let i = 1; i < data.length; i++) {
       const [timestamp, room, guests] = data[i];
       if (!timestamp || !room || !guests) continue;
@@ -195,12 +214,27 @@ function handleFetchStats(e, callback) {
       }
     }
 
+    // 🔄 Clean old data in room_only
     const roomOnlySheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("room_only");
     const roomOnlyData = roomOnlySheet.getDataRange().getValues();
-    const roomOnlyMap = {};
-
+    const roomOnlyHeader = roomOnlyData[0];
+    const roomOnlyRowsToKeep = [roomOnlyHeader];
     for (let i = 1; i < roomOnlyData.length; i++) {
       const [rDate, rRoom] = roomOnlyData[i];
+      if (!rDate || !rRoom) continue;
+      const d = new Date(rDate);
+      if (d >= threeMonthsAgo) {
+        roomOnlyRowsToKeep.push(roomOnlyData[i]);
+      }
+    }
+    roomOnlySheet.clearContents();
+    roomOnlySheet.getRange(1, 1, roomOnlyRowsToKeep.length, roomOnlyHeader.length).setValues(roomOnlyRowsToKeep);
+
+    // Now get the cleaned room_only data for stats
+    const roomOnlyDataClean = roomOnlySheet.getDataRange().getValues();
+    const roomOnlyMap = {};
+    for (let i = 1; i < roomOnlyDataClean.length; i++) {
+      const [rDate, rRoom] = roomOnlyDataClean[i];
       if (!rDate || !rRoom) continue;
       if (rDate >= startDate && rDate <= endDate) {
         if (!roomOnlyMap[rDate]) roomOnlyMap[rDate] = [];

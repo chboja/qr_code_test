@@ -1,10 +1,18 @@
 function getScriptUrl() {
   // 아래 URL을 배포된 Apps Script 웹 앱 주소로 교체하세요
-  return "https://script.google.com/macros/s/AKfycbziVMHiUGu7zxUQAErCA58Vt5mHcbu0QSJjsitptxPvL14h2ILRm2MLKeWURoYas0stWA/exec";
+  return "https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec";
 }
 
 // NOTE: 아래 YOUR_DEPLOYED_SCRIPT_ID를 실제 Google Apps Script의 배포 ID로 교체하세요!
 document.addEventListener("DOMContentLoaded", () => {
+  // 시작 날짜에 오늘 날짜 자동 입력
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+  document.getElementById("stats-start-date").value = todayStr;
+
   const searchButton = document.getElementById("stats-search-button");
 
   searchButton.addEventListener("click", () => {
@@ -15,6 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
       return;
     }
+
+    // 화면 비활성화 및 로딩 문구 표시
+    const overlay = document.createElement("div");
+    overlay.id = "loading-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(255, 255, 255, 0.7)";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = "9999";
+    overlay.innerHTML = "<div style='font-size: 24px; font-weight: bold;'>検索中...</div>";
+    document.body.appendChild(overlay);
 
     const callback = "handleStatsResponse";
     const scriptUrl = getScriptUrl();
@@ -29,8 +53,15 @@ document.addEventListener("DOMContentLoaded", () => {
 function handleStatsResponse(response) {
   if (!response.success) {
     alert("데이터를 불러오는 데 실패했습니다.");
+    // 로딩 화면 제거
+    const existingOverlay = document.getElementById("loading-overlay");
+    if (existingOverlay) existingOverlay.remove();
     return;
   }
+
+  // 로딩 화면 제거
+  const existingOverlay = document.getElementById("loading-overlay");
+  if (existingOverlay) existingOverlay.remove();
 
   console.log("✅ 통계 데이터:", response);
 
