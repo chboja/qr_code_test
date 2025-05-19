@@ -1,6 +1,6 @@
 function getScriptUrl() {
   // 아래 URL을 배포된 Apps Script 웹 앱 주소로 교체하세요
-  return "https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec";
+  return "https://script.google.com/macros/s/AKfycbwZqppTRS7CN0qJN-GIR5P9i1_0gEjAHtbGP3FGU1PY0hE0EpXnNqA9u-ErPcEe48oSuw/exec";
 }
 
 // NOTE: 아래 YOUR_DEPLOYED_SCRIPT_ID를 실제 Google Apps Script의 배포 ID로 교체하세요!
@@ -65,6 +65,23 @@ function handleStatsResponse(response) {
 
   console.log("✅ 통계 데이터:", response);
 
+  // 전체 방 수 계산
+  const totalRoom = response.totalRoom || 0;
+  const roomOnlyCount = response.roomOnlyCount || 0;
+  const usedBreakfastRoomSet = new Set(response.rows.map(row => row.room));
+  const usedBreakfastRoom = usedBreakfastRoomSet.size;
+  const unusedBreakfastRoom = totalRoom - usedBreakfastRoom - roomOnlyCount;
+
+  // 퍼센트 계산
+  const usedRate = Math.round((usedBreakfastRoom / totalRoom) * 100);
+  const unusedRate = Math.round((unusedBreakfastRoom / totalRoom) * 100);
+  const roomOnlyRate = Math.round((roomOnlyCount / totalRoom) * 100);
+
+  // 표에 값 표시 (퍼센트 포함)
+  document.getElementById("total-room").textContent = `${totalRoom}`;
+  document.getElementById("used-breakfast-room").textContent = `${usedBreakfastRoom} (${usedRate}％)`;
+  document.getElementById("unused-breakfast-room").textContent = `${unusedBreakfastRoom} (${unusedRate}％)`;
+  document.getElementById("room-only-count").textContent = `${roomOnlyCount} (${roomOnlyRate}％)`;
 
   // 총 이용객 수 계산
   const guestSum = response.rows.reduce((sum, row) => sum + row.guests, 0);
@@ -163,9 +180,16 @@ function handleStatsResponse(response) {
     const wb = XLSX.utils.book_new();
 
     // 시트1: 朝食
+    // Sort rows by timestamp, then by room (natural Japanese order)
+    const sortedBreakfastRows = [...response.rows].sort((a, b) => {
+      const t1 = new Date(a.timestamp);
+      const t2 = new Date(b.timestamp);
+      if (t1 - t2 !== 0) return t1 - t2;
+      return a.room.localeCompare(b.room, 'ja', { numeric: true });
+    });
     const breakfastData = [
       ["時間", "部屋名", "利用者数"],
-      ...response.rows.map(row => [row.timestamp, row.room, row.guests])
+      ...sortedBreakfastRows.map(row => [row.timestamp, row.room, row.guests])
     ];
     const ws1 = XLSX.utils.aoa_to_sheet(breakfastData);
     XLSX.utils.book_append_sheet(wb, ws1, "朝食");

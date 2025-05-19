@@ -1,5 +1,7 @@
 // --- Name suggestion feature: guest name list fetch and suggestion box ---
 let cachedNameList = [];
+// ⏱️ 이름 목록 마지막 갱신 시간
+let lastNameListFetchedAt = null;
 
 function fetchGuestNameList() {
   const script = document.createElement("script");
@@ -8,6 +10,7 @@ function fetchGuestNameList() {
   script.src = `${getSheetApiUrl()}?${query}`;
   showUpdatingOverlay();
   document.body.appendChild(script);
+  lastNameListFetchedAt = new Date(); // ⏱️ fetch 시간 기록
 }
 
 window.handleGuestNameList = function(response) {
@@ -76,7 +79,7 @@ async function generateHashFromObject({ room, checkIn, checkOut }) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
-const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec';
+const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbwZqppTRS7CN0qJN-GIR5P9i1_0gEjAHtbGP3FGU1PY0hE0EpXnNqA9u-ErPcEe48oSuw/exec';
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
@@ -122,6 +125,23 @@ wanakanaScript.onload = () => {
         alert("wanakana error");
         return;
       }
+
+      // 자동 갱신 검사: 페이지 진입 후, 지정 시간대에 도달했는데 갱신 안 했을 경우
+      const now = new Date();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const isRefreshHour =
+        (hour === 14 && minute >= 30) || // 14:30~
+        (hour >= 15 && hour <= 23);      // 15:00~23:00
+
+      const isNewHour = minute === 0; // 정각 여부
+      const shouldRefresh = isRefreshHour && (!lastNameListFetchedAt || lastNameListFetchedAt.getHours() !== hour);
+
+      if (shouldRefresh) {
+        console.log("⏱️ 검색 전 이름 정보 갱신 실행");
+        fetchGuestNameList();
+      }
+
       // --- Show search overlay before sending requests ---
       showSearchOverlay();
 

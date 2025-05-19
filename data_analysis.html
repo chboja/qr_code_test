@@ -20,8 +20,30 @@
       </div>
       <div id="stats-container"></div>
       <div id="stats-result" style="margin-top: 20px;"></div>
+      <div id="stats-overall-container" style="margin-bottom: 20px;">
+        <h3>全体朝食統計</h3>
+        <table id="stats-overall-table" border="1" cellpadding="6" style="border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>全体部屋数</th>
+              <th>朝食利用</th>
+              <th>未利用（朝食付き）</th>
+              <th>Room Only</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="total-room">-</td>
+              <td id="used-breakfast-room">-</td>
+              <td id="unused-breakfast-room">-</td>
+              <td id="room-only-count">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- 削除: 朝食利用率/未利用率/朝食なし率 のパーセント行 -->
+      </div>
       <div id="stats-summary-container" style="margin-top: 20px;">
-        <h3>概要統計</h3>
+        <h3>利用客統計</h3>
         <table id="stats-summary-table" border="1" cellpadding="6" style="border-collapse: collapse;">
           <thead>
             <tr>

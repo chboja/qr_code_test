@@ -1,3 +1,10 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import os
+import time
 import tkinter as tk
 from tkinter import messagebox, filedialog
 import threading
@@ -7,19 +14,8 @@ import jaconv
 import requests
 
 # --- Tkinter GUI and Message Functions ---
-def show_working_window():
-    global root
-    root = tk.Tk()
-    root.title("更新中")
-    root.geometry("300x100")
-    label = tk.Label(root, text="顧客情報を更新中...", font=("Arial", 14))
-    label.pack(expand=True)
-    root.attributes('-topmost', True)
-    root.after(100, start_upload_thread)
-    root.mainloop()
-
 def show_message(title, message):
-    messagebox.showinfo(title, message)
+    print(f"[{title}] {message}")
 
 # --- CSV Processing Utilities ---
 def format_date(raw):
@@ -36,20 +32,60 @@ def normalize_search_name(name):
     return jaconv.hira2kata(jaconv.z2h(name, kana=True, digit=False, ascii=False))
 
 # --- Upload Worker ---
-def start_upload_thread():
-    threading.Thread(target=process_and_upload).start()
-
 def process_and_upload():
-    # CSV 선택
-    root.withdraw()
-    csv_file_path = filedialog.askopenfilename(
-        title="CSV 파일 선택",
-        filetypes=[("CSV 파일", "*.csv")]
-    )
-    if not csv_file_path:
-        show_message("エラー", "CSVファイルが選択されていません。")
-        root.quit()
+    # --- Step 1: Selenium으로 CSV 다운로드 ---
+    download_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+
+    options = Options()
+    options.add_experimental_option("prefs", {
+        "download.default_directory": download_dir,
+        "download.prompt_for_download": False,
+        "directory_upgrade": True
+    })
+    # options.add_argument("--headless")  # UI 없이 실행할 경우
+
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        driver.get("https://pms.innto.jp/login.html")
+        time.sleep(2)
+        driver.find_element(By.ID, "hotelId").send_keys("A50943")
+        driver.find_element(By.ID, "accountName").send_keys("g7N5ECMc")
+        driver.find_element(By.ID, "password").send_keys("J4qUK_GE")
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "command-button"))).click()
+
+        driver.get("https://pms.innto.jp/#/reservation/index")
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, "grid-row")))
+
+        download_icon = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "span.iconfont-icon_download"))
+        )
+        download_button = download_icon.find_element(By.XPATH, "./ancestor::button")
+        download_button.click()
+
+        def wait_for_download_complete(timeout=30):
+            start = time.time()
+            while True:
+                cr_files = [f for f in os.listdir(download_dir) if f.endswith(".crdownload")]
+                if not cr_files:
+                    break
+                if time.time() - start > timeout:
+                    raise TimeoutError("⏰ 다운로드 시간 초과")
+                time.sleep(1)
+
+        wait_for_download_complete()
+
+        files = [f for f in os.listdir(download_dir) if f.endswith(".csv")]
+        csv_file_path = max([os.path.join(download_dir, f) for f in files], key=os.path.getctime)
+        print(f"✅ 다운로드된 파일: {csv_file_path}")
+
+    except Exception as e:
+        print("❌ 다운로드 오류:", e)
+        show_message("エラー", f"❌ ダウンロードエラー: {e}")
+        driver.quit()
         return
+    finally:
+        driver.quit()
 
     df = pd.read_csv(csv_file_path, encoding="cp932")
 
@@ -124,8 +160,20 @@ def process_and_upload():
         print("❌ 업로드 실패:", e)
         show_message("エラー", f"❌ リクエスト失敗: {e}")
     finally:
-        root.quit()
+        # 업로드 성공/실패 여부와 관계없이 파일 삭제 시도
+        try:
+            os.remove(csv_file_path)
+            print(f"🗑️ CSV 파일 삭제 완료: {csv_file_path}")
+        except Exception as del_err:
+            print(f"⚠️ CSV 파일 삭제 실패: {del_err}")
 
 # --- 시작 ---
 if __name__ == "__main__":
-    show_working_window()
+    try:
+        process_and_upload()
+    except Exception as e:
+        print("❌ 처리 중 예외 발생:", e)
+    finally:
+        # exe로 실행 시 자동 종료
+        import sys
+        sys.exit()
