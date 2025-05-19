@@ -435,13 +435,19 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     document.querySelectorAll("input").forEach(el => el.blur());
 
+    // 朝食の選択がされているかチェック
+    const breakfast = document.getElementById("breakfastHidden")?.value || "";
+    if (breakfast !== "O" && breakfast !== "X") {
+      alert("朝食の選択が必要です（OまたはX）。");
+      return;
+    }
+
     const name = document.getElementById("name")?.value.trim() || "";
     const room = document.getElementById("room").value.trim() || "";
     const checkIn = document.getElementById("checkIn").value || "";
     const checkOut = document.getElementById("checkOut").value || "";
     const guests = document.getElementById("guests").value || "";
     const reservation = document.getElementById("reservation").value.trim() || "";
-    const breakfast = document.getElementById("breakfastHidden")?.value || "";
 
     const breakfastFlag = (breakfast === "O" || breakfast === "1") ? "1" : "0";
     const hash = await generateHash(room, checkIn, checkOut, guests, reservation, breakfastFlag);
