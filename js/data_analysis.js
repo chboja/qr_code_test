@@ -183,6 +183,14 @@ function handleStatsResponse(response) {
     const startDate = document.getElementById("stats-start-date").value;
     const endDate = document.getElementById("stats-end-date").value;
     const filename = `朝食_統計_${startDate}_to_${endDate}.xlsx`;
-    XLSX.writeFile(wb, filename);
+
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/octet-stream" });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const previewWindow = window.open(blobUrl);
+    if (!previewWindow) {
+      alert("ポップアップがブロックされました。手動で許可してください。");
+    }
   };
 }

@@ -1,4 +1,3 @@
-
 #page-stats {
   padding: 20px;
 }
@@ -11,7 +10,20 @@
 }
 
 .search-button,
-.edit-button,
+.edit-button {
+  padding: 6px 12px;
+  font-size: 14px;
+  min-width: 80px;
+  height: 36px;
+  line-height: 1.4;
+  box-sizing: border-box;
+  cursor: pointer;
+  background-color: #2e86de;
+  color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .print-button {
   padding: 6px 12px;
   font-size: 14px;
@@ -23,7 +35,10 @@
 }
 
 .search-button:hover,
-.edit-button:hover,
+.edit-button:hover {
+  background-color: #1b4f9c;
+}
+
 .print-button:hover {
   background-color: #1b4f9c;
 }
