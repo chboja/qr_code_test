@@ -9,46 +9,46 @@
   <main class="admin-content">
     <!-- 통계 페이지 -->
     <section id="page-stats">
-      <h2 style="margin-bottom: 20px;">📊 데이터 분석 페이지</h2>
+      <h2 style="margin-bottom: 20px;">📊 データ分析ページ</h2>
       <div class="stats-controls" style="margin-bottom: 12px;">
-        <label for="stats-start-date">시작 날짜:</label>
+        <label for="stats-start-date">開始日:</label>
         <input type="date" id="stats-start-date">
-        <label for="stats-end-date" style="margin-left: 12px;">종료 날짜:</label>
+        <label for="stats-end-date" style="margin-left: 12px;">終了日:</label>
         <input type="date" id="stats-end-date">
-        <button id="stats-search-button" class="search-button" style="margin-left: 12px;" data-context="stats">검색</button>
-        <button id="stats-details-button" class="edit-button" style="margin-left: 6px;">자세히 보기</button>
+        <button id="stats-search-button" class="search-button" style="margin-left: 12px;" data-context="stats">検索</button>
+        <button id="stats-details-button" class="edit-button" style="margin-left: 6px;">詳細を見る</button>
       </div>
       <div id="stats-container"></div>
       <div id="stats-result" style="margin-top: 20px;"></div>
       <div id="stats-summary-container" style="margin-top: 20px;">
-        <h3>요약 통계</h3>
+        <h3>概要統計</h3>
         <table id="stats-summary-table" border="1" cellpadding="6" style="border-collapse: collapse;">
           <thead>
             <tr>
-              <th>총합 (room_only)</th>
-              <th>총합 (guest_nm)</th>
-              <th>일평균 (room_only)</th>
-              <th>일평균 (guest_nm)</th>
+              <th>朝食利用者数 合計</th>
+              <th>Room Only 合計</th>
+              <th>朝食利用者数 日平均</th>
+              <th>Room Only 日平均</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td id="sum-room-only">-</td>
               <td id="sum-guest">-</td>
-              <td id="avg-room-only">-</td>
+              <td id="sum-room-only">-</td>
               <td id="avg-guest">-</td>
+              <td id="avg-room-only">-</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div id="stats-time-range-container" style="margin-top: 20px;">
-        <h3>시간대별 평균 대기 시간 및 데이터 수</h3>
+        <h3>時間帯別統計</h3>
         <table id="time-range-table" border="1" cellpadding="6" style="border-collapse: collapse;">
           <thead>
             <tr>
-              <th>시간대</th>
-              <th>총 이용객 수</th>
-              <th>일평균 이용객 수</th>
+              <th>時間帯</th>
+              <th>総利用者数</th>
+              <th>日平均利用者数</th>
             </tr>
           </thead>
           <tbody>
@@ -59,5 +59,6 @@
     </section>
   </main>
   <script src="js/data_analysis.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>

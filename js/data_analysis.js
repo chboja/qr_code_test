@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const endDate = document.getElementById("stats-end-date").value;
 
     if (!startDate || !endDate) {
-      alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
+      alert("開始日と終了日を選択してください。");
       return;
     }
 
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function handleStatsResponse(response) {
   if (!response.success) {
-    alert("데이터를 불러오는 데 실패했습니다.");
+    alert("データの取得に失敗しました。");
     // 로딩 화면 제거
     const existingOverlay = document.getElementById("loading-overlay");
     if (existingOverlay) existingOverlay.remove();
@@ -157,4 +157,32 @@ function handleStatsResponse(response) {
 
     timeRangeBody.appendChild(row);
   });
+
+  const detailsButton = document.getElementById("stats-details-button");
+  detailsButton.onclick = () => {
+    const wb = XLSX.utils.book_new();
+
+    // 시트1: 朝食
+    const breakfastData = [
+      ["時間", "部屋名", "利用者数"],
+      ...response.rows.map(row => [row.timestamp, row.room, row.guests])
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(breakfastData);
+    XLSX.utils.book_append_sheet(wb, ws1, "朝食");
+
+    // 시트2: Room Only
+    const roomOnlyData = [["日付", "部屋名"]];
+    for (const [date, rooms] of Object.entries(response.roomOnly || {})) {
+      for (const room of rooms) {
+        roomOnlyData.push([date, room]);
+      }
+    }
+    const ws2 = XLSX.utils.aoa_to_sheet(roomOnlyData);
+    XLSX.utils.book_append_sheet(wb, ws2, "Room Only");
+
+    const startDate = document.getElementById("stats-start-date").value;
+    const endDate = document.getElementById("stats-end-date").value;
+    const filename = `朝食_統計_${startDate}_to_${endDate}.xlsx`;
+    XLSX.writeFile(wb, filename);
+  };
 }
