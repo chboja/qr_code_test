@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbxwRK1JiiHP8dkZCNI1s1M4Iuy00Rp7Y7WOVgaXEFw0fyE81vDC4LfszmkFfwGduVHH4A/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbygHjNroBxYb3Qs8Z5Kt4UZTYJfT08KUrYgxHIv2dczJyFKTM-KJT-Zm0jXgEnuXM4Fyw/exec";
 document.addEventListener("DOMContentLoaded", () => {
   // --- Message strings for alerts ---
   const messages = {

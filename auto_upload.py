@@ -61,23 +61,32 @@ def process_and_upload():
             EC.presence_of_element_located((By.CSS_SELECTOR, "span.iconfont-icon_download"))
         )
         download_button = download_icon.find_element(By.XPATH, "./ancestor::button")
+
+        # --- Remember existing CSV files before download ---
+        existing_csv_files = set(f for f in os.listdir(download_dir) if f.endswith(".csv"))
+
         download_button.click()
 
-        def wait_for_download_complete(timeout=30):
-            start = time.time()
-            while True:
-                cr_files = [f for f in os.listdir(download_dir) if f.endswith(".crdownload")]
-                if not cr_files:
-                    break
-                if time.time() - start > timeout:
-                    raise TimeoutError("⏰ 다운로드 시간 초과")
-                time.sleep(1)
+        print("⌛ 다운로드 시작 대기 중...")
+        time.sleep(5)  # 다운로드 버튼 클릭 후 약간 대기
 
-        wait_for_download_complete()
+        start = time.time()
+        csv_file_path = None
+        while time.time() - start < 30:
+            csv_files = [f for f in os.listdir(download_dir) if f.endswith(".csv")]
+            new_files = [f for f in csv_files if f not in existing_csv_files]
+            if new_files:
+                csv_file_path = max(
+                    [os.path.join(download_dir, f) for f in new_files],
+                    key=os.path.getmtime
+                )
+                break
+            time.sleep(1)
 
-        files = [f for f in os.listdir(download_dir) if f.endswith(".csv")]
-        csv_file_path = max([os.path.join(download_dir, f) for f in files], key=os.path.getctime)
-        print(f"✅ 다운로드된 파일: {csv_file_path}")
+        if not csv_file_path:
+            raise FileNotFoundError("❌ 새로운 .csv 파일이 시간 내에 다운로드되지 않았습니다.")
+
+        print(f"✅ 다운로드된 파일 경로: {csv_file_path}")
 
     except Exception as e:
         print("❌ 다운로드 오류:", e)
@@ -139,7 +148,7 @@ def process_and_upload():
         .tolist()
     )
 
-    GAS_URL = "https://script.google.com/macros/s/AKfycbyjgXAbIACYgt0fddimb1BLRx307gpsazwJdFJ7IM26H7bQUBs7M-QKn21WxWmAQqaitQ/exec"
+    GAS_URL = "https://script.google.com/macros/s/AKfycbygHjNroBxYb3Qs8Z5Kt4UZTYJfT08KUrYgxHIv2dczJyFKTM-KJT-Zm0jXgEnuXM4Fyw/exec"
     upload_payload = {
         "rows": [row.split(",") for row in rows],
         "roomOnly": ",".join(room_only_rooms)

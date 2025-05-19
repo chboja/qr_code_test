@@ -368,21 +368,16 @@ function doPost(e) {
     try {
       const totalSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("total_nm");
       const today = new Date();
+      today.setDate(today.getDate() + 1); // 하루 더함
       const dateStr = Utilities.formatDate(today, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
       const guestSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
       const guestData = guestSheet.getDataRange().getValues();
-      const roomSet = new Set();
-      for (let i = 1; i < guestData.length; i++) {
-        const room = guestData[i][1];
-        if (room) roomSet.add(String(room).trim());
-      }
-
       const totalRows = guestData.length - 1;
 
       const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
       const totalData = totalSheet.getDataRange().getValues();
-      const header = ["日付", "部屋数", "行数"];
+      const header = ["日付", "行数"];
       const filtered = [header];
 
       for (let i = 1; i < totalData.length; i++) {
@@ -392,7 +387,7 @@ function doPost(e) {
         }
       }
 
-      const newRow = [dateStr, roomSet.size, totalRows];
+      const newRow = [dateStr, totalRows];
       const updated = [...filtered, newRow];
       totalSheet.clearContents();
       totalSheet.getRange(1, 1, updated.length, updated[0].length).setValues(updated);
