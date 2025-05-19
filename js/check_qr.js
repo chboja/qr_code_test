@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // ✅ 서버에 예약번호와 해쉬값 검증 요청
       try {
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbwZqppTRS7CN0qJN-GIR5P9i1_0gEjAHtbGP3FGU1PY0hE0EpXnNqA9u-ErPcEe48oSuw/exec";
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbxwRK1JiiHP8dkZCNI1s1M4Iuy00Rp7Y7WOVgaXEFw0fyE81vDC4LfszmkFfwGduVHH4A/exec";
         const verifyUrl = `${scriptUrl}?callback=handleVerifyResponse&hashcode=${encodeURIComponent(hashFromQR)}&verifyReservation=${encodeURIComponent(reservation)}`;
 
         const script = document.createElement("script");

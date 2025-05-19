@@ -253,12 +253,25 @@ function handleFetchStats(e, callback) {
       if (room) roomSet.add(String(room).trim());
     }
 
+    // --- Read from total_nm sheet for guestTotalSum ---
+    const totalSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("total_nm");
+    const totalData = totalSheet.getDataRange().getValues();
+    let guestTotalSum = 0;
+    for (let i = 1; i < totalData.length; i++) {
+      const [d, , rowCount] = totalData[i];
+      const dateStr = Utilities.formatDate(new Date(d), Session.getScriptTimeZone(), "yyyy-MM-dd");
+      if (dateStr >= startDate && dateStr <= endDate) {
+        guestTotalSum += Number(rowCount) || 0;
+      }
+    }
+
     return jsonpResponse(callback, {
       success: true,
       rows: results,
       roomOnly: roomOnlyMap,
       totalRoom: roomSet.size,
-      roomOnlyCount: roomOnlySum
+      roomOnlyCount: roomOnlySum,
+      guestTotal: guestTotalSum
     });
   } catch (err) {
     return jsonpResponse(callback, { success: false, error: err.message });
@@ -357,7 +370,6 @@ function doPost(e) {
       const today = new Date();
       const dateStr = Utilities.formatDate(today, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
-      // 총 방 수 계산 (중복 제거 기준: room column)
       const guestSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
       const guestData = guestSheet.getDataRange().getValues();
       const roomSet = new Set();
@@ -366,11 +378,13 @@ function doPost(e) {
         if (room) roomSet.add(String(room).trim());
       }
 
-      // 3개월 전보다 이전 데이터 삭제
+      const totalRows = guestData.length - 1;
+
       const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
       const totalData = totalSheet.getDataRange().getValues();
-      const header = totalData[0];
+      const header = ["日付", "部屋数", "行数"];
       const filtered = [header];
+
       for (let i = 1; i < totalData.length; i++) {
         const d = new Date(totalData[i][0]);
         if (!isNaN(d) && d >= threeMonthsAgo) {
@@ -378,10 +392,9 @@ function doPost(e) {
         }
       }
 
-      // 기존 데이터 정리 후 새로운 값 추가
-      totalSheet.clearContents();
-      const newRow = [dateStr, roomSet.size];
+      const newRow = [dateStr, roomSet.size, totalRows];
       const updated = [...filtered, newRow];
+      totalSheet.clearContents();
       totalSheet.getRange(1, 1, updated.length, updated[0].length).setValues(updated);
     } catch (err) {
       Logger.log("❌ total_nm 처리 에러: " + err.message);
