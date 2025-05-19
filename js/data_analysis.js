@@ -58,6 +58,8 @@ function handleStatsResponse(response) {
 
   document.getElementById("sum-room-only").textContent = roomOnlySum;
   document.getElementById("avg-room-only").textContent = roomOnlyAvg;
+  document.getElementById("sum-guest").textContent = guestSum;
+  document.getElementById("avg-guest").textContent = guestAvg;
 
   // 디버그 로그 출력
   console.log("총 이용객 수:", guestSum);
