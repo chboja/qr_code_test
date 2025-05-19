@@ -217,3 +217,89 @@ function handleGuestNameList(e, callback) {
     return jsonpResponse(callback, { success: false, error: err.message });
   }
 }
+// --- POST 업로드용 doPost(e) 함수 ---
+function doPost(e) {
+  Logger.log("📥 받은 POST 데이터: " + e.postData.contents);
+
+  let body;
+  try {
+    body = JSON.parse(e.postData.contents || "{}");
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: "Invalid JSON: " + err.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const rows = body.rows;
+  const roomOnlyData = body.roomOnly;
+
+  const result = {
+    guestUpload: null,
+    roomOnlyUpload: null,
+  };
+
+  try {
+    // --- guest_list 처리 ---
+    if (rows) {
+      const guestSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("guest_list");
+
+      // ✅ 기존 데이터 삭제 (헤더는 유지)
+      if (guestSheet.getLastRow() > 1) {
+        guestSheet.getRange(2, 1, guestSheet.getLastRow() - 1, guestSheet.getLastColumn()).clearContent();
+      }
+
+      const guestRows = rows.map(fields => {
+        if (fields.length > 10) {
+          fields[10] = fields[10].replace(/\\n/g, '\n');
+        }
+        return fields;
+      });
+      const guestLastRow = guestSheet.getLastRow() + 1;
+      guestSheet.getRange(guestLastRow, 1, guestRows.length, guestRows[0].length)
+        .setValues(guestRows)
+        .setWrap(true);
+      // --- Set number format to plain text for columns 1, 3, 4, 5, 8, 10 after setValues ---
+      const textColumns = [1, 3, 4, 5, 8, 10]; // 1-based indices
+      textColumns.forEach(function(col) {
+        guestSheet.getRange(guestLastRow, col, guestRows.length, 1).setNumberFormat('@');
+      });
+      result.guestUpload = { success: true, inserted: guestRows.length };
+    }
+
+    // --- room_only 처리 ---
+    if (roomOnlyData) {
+      const roomSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("room_only");
+      const today = new Date();
+      today.setDate(today.getDate() + 1);
+      const date = Utilities.formatDate(today, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      const newRoomRows = roomOnlyData.trim().split(',').map(room => [date, room]);
+
+      const existingData = roomSheet.getDataRange().getValues();
+      const header = existingData[0];
+      const bodyRows = existingData.slice(1);
+
+      const existingSet = new Set(bodyRows.map(row => `${row[0]}_${row[1]}`));
+      const uniqueNewRows = newRoomRows.filter(([d, r]) => !existingSet.has(`${d}_${r}`));
+
+      const finalData = [header, ...bodyRows, ...uniqueNewRows];
+      roomSheet.clearContents();
+      roomSheet.getRange(1, 1, finalData.length, finalData[0].length).setValues(finalData);
+      // Set the first column (date) to plain text format
+      roomSheet.getRange(2, 1, finalData.length - 1, 1).setNumberFormat('@');
+      result.roomOnlyUpload = { success: true, inserted: uniqueNewRows.length };
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.message,
+      debug: {
+        body,
+        csvLength: csvData?.length || 0,
+        roomOnlyLength: roomOnlyData?.length || 0
+      }
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
