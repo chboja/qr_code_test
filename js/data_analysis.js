@@ -103,4 +103,27 @@ function handleStatsResponse(response) {
   for (const [date, rooms] of Object.entries(response.roomOnly || {})) {
     console.log(`📅 ${date}: ${rooms.join(", ")}`);
   }
+
+  const timeRangeBody = document.querySelector("#time-range-table tbody");
+  timeRangeBody.innerHTML = "";
+
+  timeRanges.forEach(range => {
+    const avg = Math.round(range.total / dateDiff);
+    const row = document.createElement("tr");
+
+    const timeCell = document.createElement("td");
+    timeCell.textContent = range.label;
+
+    const totalCell = document.createElement("td");
+    totalCell.textContent = range.total;
+
+    const avgCell = document.createElement("td");
+    avgCell.textContent = avg;
+
+    row.appendChild(timeCell);
+    row.appendChild(totalCell);
+    row.appendChild(avgCell);
+
+    timeRangeBody.appendChild(row);
+  });
 }
