@@ -195,9 +195,23 @@ function handleFetchStats(e, callback) {
       }
     }
 
+    const roomOnlySheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("room_only");
+    const roomOnlyData = roomOnlySheet.getDataRange().getValues();
+    const roomOnlyMap = {};
+
+    for (let i = 1; i < roomOnlyData.length; i++) {
+      const [rDate, rRoom] = roomOnlyData[i];
+      if (!rDate || !rRoom) continue;
+      if (rDate >= startDate && rDate <= endDate) {
+        if (!roomOnlyMap[rDate]) roomOnlyMap[rDate] = [];
+        roomOnlyMap[rDate].push(String(rRoom));
+      }
+    }
+
     return jsonpResponse(callback, {
       success: true,
-      rows: results
+      rows: results,
+      roomOnly: roomOnlyMap
     });
   } catch (err) {
     return jsonpResponse(callback, { success: false, error: err.message });

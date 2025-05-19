@@ -1,6 +1,6 @@
 function getScriptUrl() {
   // 아래 URL을 배포된 Apps Script 웹 앱 주소로 교체하세요
-  return "https://script.google.com/macros/s/AKfycbzU62BxuaeENDC0NScvkRCsEwi7yWOWML4ZSLdnQztQLHjSRmXe8hyzLJBX0hhl28xFpg/exec";
+  return "https://script.google.com/macros/s/AKfycbziVMHiUGu7zxUQAErCA58Vt5mHcbu0QSJjsitptxPvL14h2ILRm2MLKeWURoYas0stWA/exec";
 }
 
 // NOTE: 아래 YOUR_DEPLOYED_SCRIPT_ID를 실제 Google Apps Script의 배포 ID로 교체하세요!
@@ -82,4 +82,10 @@ function handleStatsResponse(response) {
     const avg = Math.round(range.total / dateDiff);
     console.log(`${range.label} → 총합: ${range.total}명, 일평균: ${avg}명`);
   });
+
+  // 📌 roomOnly 정보 로그 출력
+  console.log("🚫 조식 미포함(room only) 방 정보:");
+  for (const [date, rooms] of Object.entries(response.roomOnly || {})) {
+    console.log(`📅 ${date}: ${rooms.join(", ")}`);
+  }
 }
