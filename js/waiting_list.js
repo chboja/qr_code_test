@@ -244,14 +244,17 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (result.success && result.exists) {
-                // Check if room already exists in localStorage with status "1"
-                const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-                const existing = localData.find(entry => entry.split(",")[0] === room);
-                if (existing && existing.split(",")[3] === "1") {
+              // Check if room already exists in localStorage and if guest count is full
+              const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+              const existing = localData.find(entry => entry.split(",")[0] === room);
+              if (existing) {
+                const [_, currentGuests, __, status] = existing.split(",");
+                if (parseInt(currentGuests) >= parseInt(guests)) {
                   lastScannedText = "";
                   showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
                   return;
                 }
+              }
                 window.currentRoomText = room;
                 window.maxGuestsFromQR = parseInt(guests);
                 document.getElementById("guestCountInput").value = guests;
@@ -385,6 +388,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return `${parts[0]}号 ${parts[1]}名 ${parts[2]} (${statusText})`;
           }).join("\n");
           showCustomAlert(display);
+          // prevent auto-close by commenting out the timer
+          const alertBox = document.querySelector(".custom-alert-overlay");
+          if (alertBox) {
+            const closeBtn = alertBox.querySelector("#customAlertClose");
+            if (closeBtn) {
+              closeBtn.onclick = () => {
+                alertBox.remove();
+              };
+            }
+          }
         }
         // Clear input field after processing
         document.getElementById("qrResult").value = "";
