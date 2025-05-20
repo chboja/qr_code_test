@@ -66,6 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const isComplete = "0";
 
     const newData = `${room},${newGuests},${timestamp},${isComplete}`;
+    // Only update an existing entry if status is "0" (waiting).
+    // If not found, always add a new entry, even if a status "1" entry for this room exists.
     if (index !== -1) {
       localData[index] = newData;
     } else {
