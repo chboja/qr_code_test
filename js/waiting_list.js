@@ -38,10 +38,35 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   }
   // --- Helper to update localStorage waitingList entry ---
-  function updateLocalStorageEntry(room, guests, timestamp, status = "0") {
+  // guestsToAdd: number of guests to add (incremental)
+  // timestamp: current or original timestamp
+  // status: default "0"
+  // totalFromQR: if provided, maximum total guests allowed for this room (from QR)
+  function updateLocalStorageEntry(room, guestsToAdd, timestamp, status = "0", totalFromQR = null) {
     const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-    const newData = `${room},${parseInt(guests)},${timestamp},${status}`;
+    let currentGuests = 0;
+    let existingStatus = status;
+    let existingTimestamp = timestamp;
+
     const index = localData.findIndex(entry => entry.split(",")[0] === room);
+    if (index !== -1) {
+      const parts = localData[index].split(",");
+      currentGuests = parseInt(parts[1]) || 0;
+      existingTimestamp = parts[2];
+      existingStatus = parts[3];
+    }
+
+    let newGuests = currentGuests + parseInt(guestsToAdd);
+    if (totalFromQR !== null) {
+      newGuests = Math.min(newGuests, totalFromQR);
+    }
+
+    // Updated logic: status resets to "0" if not all guests have entered yet, even if previously "1"
+    let isComplete = "0";
+    if (totalFromQR !== null) {
+      isComplete = newGuests >= totalFromQR ? "1" : "0";
+    }
+    const newData = `${room},${newGuests},${existingTimestamp},${isComplete}`;
     if (index !== -1) {
       localData[index] = newData;
     } else {
