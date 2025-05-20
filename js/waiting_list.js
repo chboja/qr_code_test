@@ -62,11 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (newGuests <= 0) return;
 
-    // Determine if this completes the totalFromQR
-    const isComplete = totalFromQR !== null && newGuests + localData.reduce((sum, entry) => {
-      const [r, g, , s] = entry.split(",");
-      return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
-    }, 0) >= totalFromQR ? "1" : "0";
+    // Always set isComplete to "0" (대기 상태) until the room button is pressed.
+    const isComplete = "0";
 
     const newData = `${room},${newGuests},${timestamp},${isComplete}`;
     if (index !== -1) {
