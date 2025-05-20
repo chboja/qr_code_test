@@ -577,7 +577,11 @@ document.addEventListener("DOMContentLoaded", () => {
     button.textContent = `${text}号 ${guests}名`;
     button.onclick = () => {
       const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-      const index = localData.findIndex(entry => entry.split(",")[0] === text);
+      // Only match entry with status "0"
+      const index = localData.findIndex(entry => {
+        const [r, , , s] = entry.split(",");
+        return r === text && s === "0";
+      });
       if (index !== -1) {
         const [roomNum, guests, timestamp] = localData[index].split(",");
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
