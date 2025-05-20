@@ -38,26 +38,43 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   }
   // --- Helper to update localStorage waitingList entry ---
-  // Allows multiple entries per room with unique timestamps
-  // guestsToAdd: number of guests to add (for this entry)
-  // timestamp: current or original timestamp
-  // status: default "0"
-  // totalFromQR: if provided, maximum total guests allowed for this room (from QR)
+  // Overwrites existing "대기 중" (status "0") entry for this room if present; else adds new entry.
+  // Enforces totalFromQR cap as needed.
   function updateLocalStorageEntry(room, guestsToAdd, timestamp, status = "0", totalFromQR = null) {
     const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-    const matchingEntries = localData.filter(entry => entry.split(",")[0] === room);
-    const totalGuestsSoFar = matchingEntries.reduce((sum, entry) => sum + parseInt(entry.split(",")[1] || "0"), 0);
+    // Find index of existing entry for this room with status "0"
+    const index = localData.findIndex(entry => {
+      const [r, , , s] = entry.split(",");
+      return r === room && s === "0";
+    });
 
     let newGuests = parseInt(guestsToAdd);
-    if (totalFromQR !== null && totalGuestsSoFar + newGuests > totalFromQR) {
-      newGuests = totalFromQR - totalGuestsSoFar;
+    if (totalFromQR !== null) {
+      // Calculate total guests with status "1" for this room
+      const totalGuestsSoFar = localData.reduce((sum, entry) => {
+        const [r, g, , s] = entry.split(",");
+        return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
+      }, 0);
+      if (totalGuestsSoFar + newGuests > totalFromQR) {
+        newGuests = totalFromQR - totalGuestsSoFar;
+      }
     }
 
     if (newGuests <= 0) return;
 
-    const isComplete = totalFromQR !== null && (totalGuestsSoFar + newGuests >= totalFromQR) ? "1" : "0";
+    // Determine if this completes the totalFromQR
+    const isComplete = totalFromQR !== null && newGuests + localData.reduce((sum, entry) => {
+      const [r, g, , s] = entry.split(",");
+      return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
+    }, 0) >= totalFromQR ? "1" : "0";
+
     const newData = `${room},${newGuests},${timestamp},${isComplete}`;
-    localData.push(newData);
+    if (index !== -1) {
+      localData[index] = newData;
+    } else {
+      localData.push(newData);
+    }
+
     localStorage.setItem("waitingList", JSON.stringify(localData));
   }
   // --- Custom Alert Modal Helper ---
@@ -603,12 +620,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- localStorage에 저장 ---
-    // Replaced block: always add new entry to waitingList instead of updating/overwriting
-    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+    // Use updateLocalStorageEntry to update or add the entry for this room
     const formattedTime = getCurrentFormattedTime();
-    const newData = `${text},${guests},${formattedTime},0`;
-    localData.push(newData);
-    localStorage.setItem("waitingList", JSON.stringify(localData));
+    updateLocalStorageEntry(text, guests, formattedTime, "0", window.maxGuestsFromQR || null);
 
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
