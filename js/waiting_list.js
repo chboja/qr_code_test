@@ -38,40 +38,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   }
   // --- Helper to update localStorage waitingList entry ---
-  // guestsToAdd: number of guests to add (incremental)
+  // Allows multiple entries per room with unique timestamps
+  // guestsToAdd: number of guests to add (for this entry)
   // timestamp: current or original timestamp
   // status: default "0"
   // totalFromQR: if provided, maximum total guests allowed for this room (from QR)
   function updateLocalStorageEntry(room, guestsToAdd, timestamp, status = "0", totalFromQR = null) {
     const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-    let currentGuests = 0;
-    let existingStatus = status;
-    let existingTimestamp = timestamp;
+    const matchingEntries = localData.filter(entry => entry.split(",")[0] === room);
+    const totalGuestsSoFar = matchingEntries.reduce((sum, entry) => sum + parseInt(entry.split(",")[1] || "0"), 0);
 
-    const index = localData.findIndex(entry => entry.split(",")[0] === room);
-    if (index !== -1) {
-      const parts = localData[index].split(",");
-      currentGuests = parseInt(parts[1]) || 0;
-      existingTimestamp = parts[2];
-      existingStatus = parts[3];
+    let newGuests = parseInt(guestsToAdd);
+    if (totalFromQR !== null && totalGuestsSoFar + newGuests > totalFromQR) {
+      newGuests = totalFromQR - totalGuestsSoFar;
     }
 
-    let newGuests = currentGuests + parseInt(guestsToAdd);
-    if (totalFromQR !== null) {
-      newGuests = Math.min(newGuests, totalFromQR);
-    }
+    if (newGuests <= 0) return;
 
-    // Updated logic: status resets to "0" if not all guests have entered yet, even if previously "1"
-    let isComplete = "0";
-    if (totalFromQR !== null) {
-      isComplete = newGuests >= totalFromQR ? "1" : "0";
-    }
-    const newData = `${room},${newGuests},${existingTimestamp},${isComplete}`;
-    if (index !== -1) {
-      localData[index] = newData;
-    } else {
-      localData.push(newData);
-    }
+    const isComplete = totalFromQR !== null && (totalGuestsSoFar + newGuests >= totalFromQR) ? "1" : "0";
+    const newData = `${room},${newGuests},${timestamp},${isComplete}`;
+    localData.push(newData);
     localStorage.setItem("waitingList", JSON.stringify(localData));
   }
   // --- Custom Alert Modal Helper ---
@@ -94,8 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("customAlertClose").onclick = close;
 
-    // Auto close after 3 seconds
-    setTimeout(close, 3000);
+    // Auto close after 3 seconds, except for guest list (#0) or messages with "名"
+    if (!message.includes("#0") && !message.includes("名")) {
+      setTimeout(close, 3000);
+    }
   }
   // Prevent duplicate scans of the same QR code
   let lastScannedText = "";
@@ -244,16 +232,15 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (result.success && result.exists) {
-              // Check if room already exists in localStorage and if guest count is full
+              // Check if total guests for this room already reached the limit across all entries
               const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-              const existing = localData.find(entry => entry.split(",")[0] === room);
-              if (existing) {
-                const [_, currentGuests, __, status] = existing.split(",");
-                if (parseInt(currentGuests) >= parseInt(guests)) {
-                  lastScannedText = "";
-                  showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
-                  return;
-                }
+              const matchingEntries = localData.filter(entry => entry.split(",")[0] === room);
+              const totalGuestsSoFar = matchingEntries.reduce((sum, entry) => sum + parseInt(entry.split(",")[1] || "0"), 0);
+
+              if (totalGuestsSoFar >= parseInt(guests)) {
+                lastScannedText = "";
+                showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
+                return;
               }
                 window.currentRoomText = room;
                 window.maxGuestsFromQR = parseInt(guests);
@@ -388,7 +375,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return `${parts[0]}号 ${parts[1]}名 ${parts[2]} (${statusText})`;
           }).join("\n");
           showCustomAlert(display);
-          // prevent auto-close by commenting out the timer
+          // The following block is intentionally commented out to prevent auto-close or auto-dismissal for #0
+          /*
           const alertBox = document.querySelector(".custom-alert-overlay");
           if (alertBox) {
             const closeBtn = alertBox.querySelector("#customAlertClose");
@@ -398,6 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
               };
             }
           }
+          */
         }
         // Clear input field after processing
         document.getElementById("qrResult").value = "";
@@ -641,8 +630,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- localStorage에 저장 ---
+    // Replaced block: always add new entry to waitingList instead of updating/overwriting
+    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
     const formattedTime = getCurrentFormattedTime();
-    updateLocalStorageEntry(text, guests, formattedTime, "0");
+    const newData = `${text},${guests},${formattedTime},0`;
+    localData.push(newData);
+    localStorage.setItem("waitingList", JSON.stringify(localData));
 
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
