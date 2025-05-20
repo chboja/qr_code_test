@@ -187,122 +187,95 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function onScanSuccess(decodedText, decodedResult) {
     const now = Date.now();
-    if (decodedText === lastScannedText && now - lastScannedTime < 5000) {
-      return; // Skip if scanned same QR within 5 seconds
-    }
+    if (decodedText === lastScannedText && now - lastScannedTime < 5000) return;
     lastScannedText = decodedText;
     lastScannedTime = now;
-    // Ensure QR scanner is always running; do not stop or pause here
     console.log(`✅ QRコードスキャン成功: ${decodedText}`);
     const qrResult = document.getElementById("qrResult");
     qrResult.value = decodedText;
     setTimeout(() => { qrResult.value = ""; }, 500);
 
     const parts = decodedText.split(",");
-    if (parts.length === 7) {
-      // Destructure in the correct order including guests
-      const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+    if (parts.length !== 7) {
+      showCustomAlert(`${messages.invalidQR.ja}\n${messages.invalidQR.en}`);
+      return;
+    }
 
-      // Room Onlyチェックを先に行う
-      if (breakfastFlag !== "1") {
-        showCustomAlert(`${room}号は${messages.roomOnly.ja}\n${messages.roomOnly.en}`);
+    const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+
+    if (breakfastFlag !== "1") {
+      showCustomAlert(`${room}号は${messages.roomOnly.ja}\n${messages.roomOnly.en}`);
+      lastScannedText = "";
+      return;
+    }
+
+    generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
+      if (calculatedHash !== hashFromQR) {
+        showCustomAlert(`${messages.confirmAtFront.ja}\n${messages.confirmAtFront.en}`);
         lastScannedText = "";
         return;
       }
 
-      // Only pass the required fields (including guests) to generateHash
-      generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
-        if (calculatedHash === hashFromQR) {
-          // 추가: 예약번호 서버 확인
-          const loading = document.getElementById("loadingOverlay");
-          if (loading) loading.style.display = "flex";
-          fetch(`${SCRIPT_BASE_URL}?mode=verifyReservation&verifyReservation=${reservation}&callback=verifyCallback`)
-            .then(response => response.text())
-            .then(text => {
-              const loading = document.getElementById("loadingOverlay");
-              if (loading) loading.style.display = "none";
-              const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
-              const result = JSON.parse(jsonText);
+      const loading = document.getElementById("loadingOverlay");
+      if (loading) loading.style.display = "flex";
+      fetch(`${SCRIPT_BASE_URL}?mode=verifyReservation&verifyReservation=${reservation}&callback=verifyCallback`)
+        .then(response => response.text())
+        .then(text => {
+          if (loading) loading.style.display = "none";
+          const jsonText = text.replace(/^.*?\(/, "").replace(/\);?$/, "");
+          const result = JSON.parse(jsonText);
 
-              // 🟡 Show GAS logs
-              if (result.logs && Array.isArray(result.logs)) {
-                result.logs.forEach(log => {
-                  logDebug("🔍 GAS: " + log);
-                });
-              }
+          if (!result.success || !result.exists) {
+            showCustomAlert(`${messages.confirmAtFront.ja}\n${messages.confirmAtFront.en}`);
+            lastScannedText = "";
+            return;
+          }
 
-              if (result.success && result.exists) {
-              // Check if total guests for this room already reached the limit across all entries
-              const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-              const matchingEntries = localData.filter(entry => entry.split(",")[0] === room);
-              const totalGuestsSoFar = matchingEntries.reduce((sum, entry) => sum + parseInt(entry.split(",")[1] || "0"), 0);
+          const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+          const matchingEntries = localData.filter(entry => entry.split(",")[0] === room);
+          const totalGuestsSoFar = matchingEntries.reduce((sum, entry) => {
+            const status = entry.split(",")[3];
+            return sum + (status === "1" ? parseInt(entry.split(",")[1]) : 0);
+          }, 0);
 
-              if (totalGuestsSoFar >= parseInt(guests)) {
-                lastScannedText = "";
-                showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
-                return;
-              }
-                window.currentRoomText = room;
-                window.maxGuestsFromQR = parseInt(guests);
-                document.getElementById("guestCountInput").value = guests;
-                document.getElementById("customPromptOverlay").style.display = "flex";
-                // Set prompt message in Japanese and English (2 lines)
-                var promptLabel = document.getElementById("customPromptLabel");
-                if (promptLabel) {
-                  promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
-                }
-                // Set custom prompt button labels (2 lines, Japanese + English)
-                var cancelBtn = document.getElementById("customPromptCancel");
-                var confirmBtn = document.getElementById("customPromptConfirm");
-                if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
-                if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
-                document.getElementById("guestCountInput").focus();
+          const remainingGuests = parseInt(guests) - totalGuestsSoFar;
+          if (remainingGuests <= 0) {
+            showCustomAlert(`${room}号は${messages.alreadyHadBreakfast.ja}\n${messages.alreadyHadBreakfast.en}`);
+            lastScannedText = "";
+            return;
+          }
 
-                // + / - 버튼 이벤트 바인딩
-                const inputEl = document.getElementById("guestCountInput");
-                const decreaseBtn = document.getElementById("decreaseGuestBtn");
-                const increaseBtn = document.getElementById("increaseGuestBtn");
+          window.currentRoomText = room;
+          window.maxGuestsFromQR = remainingGuests;
+          document.getElementById("guestCountInput").value = remainingGuests;
+          document.getElementById("customPromptOverlay").style.display = "flex";
+          const promptLabel = document.getElementById("customPromptLabel");
+          if (promptLabel) {
+            promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+          }
+          const cancelBtn = document.getElementById("customPromptCancel");
+          const confirmBtn = document.getElementById("customPromptConfirm");
+          if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
+          if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
+          document.getElementById("guestCountInput").focus();
 
-                decreaseBtn.onclick = () => {
-                  let val = parseInt(inputEl.value) || 1;
-                  if (val > 1) inputEl.value = val - 1;
-                };
-
-                increaseBtn.onclick = () => {
-                  let val = parseInt(inputEl.value) || 1;
-                  const max = window.maxGuestsFromQR || 10;
-                  if (val < max) inputEl.value = val + 1;
-                };
-
-                // Save to localStorage
-                const formattedTime = getCurrentFormattedTime();
-                updateLocalStorageEntry(room, guests, formattedTime, "0");
-              } else {
-                console.warn("❌ 예약번호がシートにない、またはハッシュ不一致");
-                // Resume QR scanning after alert (with delay for iOS/Safari)
-                setTimeout(() => {
-                  restartQrScanner();
-                }, 300);
-                lastScannedText = "";
-                showCustomAlert(`${messages.confirmAtFront.ja}\n${messages.confirmAtFront.en}`);
-              }
-            })
-            .catch(err => {
-              const loading = document.getElementById("loadingOverlay");
-              if (loading) loading.style.display = "none";
-              console.error("🔴 예약번호 확인 중 오류 발생", err);
-              showCustomAlert("予約番号の確認中にエラーが発生しました。");
-            });
-          // END 추가
-        } else {
-          console.warn("🔴 QRコードのハッシュが一致しません（無効なQR）");
-          lastScannedText = "";
-          showCustomAlert(`${messages.invalidQR.ja}\n${messages.invalidQR.en}`);
-        }
-      });
-    } else {
-      console.warn("🔴 QRコード形式が正しくありません");
-    }
+          const inputEl = document.getElementById("guestCountInput");
+          document.getElementById("decreaseGuestBtn").onclick = () => {
+            let val = parseInt(inputEl.value) || 1;
+            if (val > 1) inputEl.value = val - 1;
+          };
+          document.getElementById("increaseGuestBtn").onclick = () => {
+            let val = parseInt(inputEl.value) || 1;
+            const max = window.maxGuestsFromQR || 10;
+            if (val < max) inputEl.value = val + 1;
+          };
+        })
+        .catch(err => {
+          if (loading) loading.style.display = "none";
+          console.error("🔴 verifyReservation error:", err);
+          showCustomAlert("予約番号の確認中にエラーが発生しました。");
+        });
+    });
   }
 
   async function generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }) {
