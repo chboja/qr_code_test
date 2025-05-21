@@ -571,16 +571,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const text = window.currentRoomText || "";
+    const room = window.currentRoomText || "";
     const button = document.createElement("button");
     button.classList.add("dynamic-button");
-    button.textContent = `${text}号 ${guests}名`;
+    button.textContent = `${room}号 ${guests}名`;
     button.onclick = () => {
       const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
       // Only match entry with status "0"
       const index = localData.findIndex(entry => {
         const [r, , , s] = entry.split(",");
-        return r === text && s === "0";
+        return r === room && s === "0";
       });
       if (index !== -1) {
         const [roomNum, guests, timestamp] = localData[index].split(",");
@@ -613,11 +613,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const listContainer = document.getElementById("List");
     // Check for an existing button with the same room number before appending
     const existingButton = Array.from(listContainer.children).find(btn =>
-      btn.textContent.startsWith(`${text}号`)
+      btn.textContent.startsWith(`${room}号`)
     );
 
     if (existingButton) {
-      existingButton.textContent = `${text}号 ${guests}名`;
+      existingButton.textContent = `${room}号 ${guests}名`;
     } else {
       listContainer.appendChild(button);
     }
@@ -625,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- localStorage에 저장 ---
     // Use updateLocalStorageEntry to update or add the entry for this room
     const formattedTime = getCurrentFormattedTime();
-    updateLocalStorageEntry(text, guests, formattedTime, "0", window.maxGuestsFromQR || null);
+    updateLocalStorageEntry(room, guests, formattedTime, "0", window.maxGuestsFromQR || null);
 
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
