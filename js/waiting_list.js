@@ -46,29 +46,38 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check how many guests have already had breakfast (status "1")
     const totalGuestsSoFar = localData.reduce((sum, entry) => {
       const [r, g, , s] = entry.split(",");
-      return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
+      return (String(r) === String(room) && s === "1") ? sum + parseInt(g || "0") : sum;
     }, 0);
 
     let newGuests = parseInt(guestsToAdd);
     if (totalFromQR !== null) {
       const remaining = totalFromQR - totalGuestsSoFar;
-      if (remaining <= 0) return;
+      console.log(`[DEBUG] Room: ${room}, Total from QR: ${totalFromQR}, Already eaten: ${totalGuestsSoFar}, Remaining: ${remaining}`);
+      if (remaining <= 0) {
+        console.log(`[DEBUG] Skipping add: no guests remaining for room ${room}.`);
+        return;
+      }
       newGuests = Math.min(newGuests, remaining);
     }
 
-    if (newGuests <= 0) return;
+    if (newGuests <= 0) {
+      console.log(`[DEBUG] Skipping add: newGuests <= 0 for room ${room}.`);
+      return;
+    }
 
     const newData = `${room},${newGuests},${timestamp},0`;
 
     // Look for existing status "0" entry to overwrite
     const index = localData.findIndex(entry => {
       const [r, , , s] = entry.split(",");
-      return r === room && s === "0";
+      return String(r) === String(room) && s === "0";
     });
 
     if (index !== -1) {
+      console.log(`[DEBUG] Overwriting existing status 0 entry for room ${room}`);
       localData[index] = newData;
     } else {
+      console.log(`[DEBUG] Adding new status 0 entry for room ${room}`);
       localData.push(newData);
     }
 
