@@ -632,7 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- localStorage에 저장 ---
     // Use updateLocalStorageEntry to update or add the entry for this room
     const formattedTime = getCurrentFormattedTime();
-    updateLocalStorageEntry(room, guests, formattedTime, "0", window.maxGuestsFromQR || null);
+    updateLocalStorageEntry(room, guests, formattedTime, "0", null);
 
     document.getElementById("qrResult").value = "";
     document.getElementById("guestCountInput").value = "";
