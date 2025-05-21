@@ -115,12 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Reusable QR scanner restart function ---
   function restartQrScanner() {
     html5QrCode.start(
-      { facingMode: "user" },
+      { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } },
       {
-        fps: 10,
+        fps: 15,
         qrbox: function(viewfinderWidth, viewfinderHeight) {
           const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-          const boxSize = Math.floor(minEdge * 0.7);
+          const boxSize = Math.floor(minEdge * 0.9);  // Enlarged from 0.7 to 0.9
           return { width: boxSize, height: boxSize };
         }
       },
@@ -318,12 +318,12 @@ document.addEventListener("DOMContentLoaded", () => {
   Html5Qrcode.getCameras().then(devices => {
     if (devices && devices.length > 0) {
       html5QrCode.start(
-        { facingMode: "user" },
+        { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } },
         {
-          fps: 10,
+          fps: 15,
           qrbox: function(viewfinderWidth, viewfinderHeight) {
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
+            const boxSize = Math.floor(minEdge * 0.9);  // Enlarged from 0.7 to 0.9
             return { width: boxSize, height: boxSize };
           }
         },
