@@ -35,7 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const dd = String(now.getDate()).padStart(2, '0');
     const hh = String(now.getHours()).padStart(2, '0');
     const min = String(now.getMinutes()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    const sec = String(now.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
   }
   // --- Helper to update localStorage waitingList entry ---
   // Replaces/overwrites status "0" entry for this room if present.
@@ -84,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("waitingList", JSON.stringify(localData));
   }
   // --- Custom Alert Modal Helper ---
-  function showCustomAlert(message) {
+  window.showCustomAlert = function(message) {
     const overlay = document.createElement("div");
     overlay.className = "custom-alert-overlay";
     overlay.innerHTML = `
