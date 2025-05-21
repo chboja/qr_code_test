@@ -384,7 +384,8 @@ function doPost(e) {
 
       for (let i = 1; i < totalData.length; i++) {
         const d = new Date(totalData[i][0]);
-        if (!isNaN(d) && d >= threeMonthsAgo) {
+        const dStr = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+        if (!isNaN(d) && d >= threeMonthsAgo && dStr !== dateStr) {
           filtered.push(totalData[i]);
         }
       }

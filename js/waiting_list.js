@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbw7b5RGYeP5nNI5m5cb5sU8zvygyL2cvvKwuZrcd6_VPn7Qoj5nYeyw5Pn4nvCyrCSWMw/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbyJwWeDVnIpBq397kD6NMiv2qTNrfD7AkTaXg2QR1Ldtlit0D3J45CznX2dY0tgm7KWaQ/exec";
 document.addEventListener("DOMContentLoaded", () => {
   // --- Message strings for alerts ---
   const messages = {
@@ -174,8 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedEntry = `${roomNum},${guests},${timestamp},1`;
         localData[index] = updatedEntry;
         localStorage.setItem("waitingList", JSON.stringify(localData));
-        // Show confirmation modal before disabling the button
-        showCustomAlert(`${roomNum}号 ${guests}名\n入場を確認しました。\nEntry confirmed.`);
         // 버튼 비활성화 및 제거
         button.disabled = true;
         button.style.opacity = "0.5";
@@ -284,15 +282,22 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("guestCountInput").focus();
 
           const inputEl = document.getElementById("guestCountInput");
-          document.getElementById("decreaseGuestBtn").onclick = () => {
+          const decreaseBtn = document.getElementById("decreaseGuestBtn");
+          const increaseBtn = document.getElementById("increaseGuestBtn");
+
+          decreaseBtn.onclick = () => {
             let val = parseInt(inputEl.value) || 1;
             if (val > 1) inputEl.value = val - 1;
           };
-          document.getElementById("increaseGuestBtn").onclick = () => {
+          increaseBtn.onclick = () => {
             let val = parseInt(inputEl.value) || 1;
             const max = window.maxGuestsFromQR || 10;
             if (val < max) inputEl.value = val + 1;
           };
+
+          // Prevent zoom on double-tap for these buttons
+          decreaseBtn.addEventListener("dblclick", (e) => e.preventDefault());
+          increaseBtn.addEventListener("dblclick", (e) => e.preventDefault());
         })
         .catch(err => {
           if (loading) loading.style.display = "none";
@@ -667,12 +672,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.handlePostResponse = function(response) {
   console.log("📦 서버 응답:", response); // 콘솔에 출력
-  if (response && response.success) {
-    showCustomAlert("記録が完了しました。");
-    restartQrScanner();
-  } else {
-    showCustomAlert("記録中にエラーが発生しました。");
-    console.error("記録エラー:", response);
-    restartQrScanner();
-  }
+  restartQrScanner();
 };
