@@ -38,36 +38,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   }
   // --- Helper to update localStorage waitingList entry ---
-  // Overwrites existing "대기 중" (status "0") entry for this room if present; else adds new entry.
-  // Enforces totalFromQR cap as needed.
+  // Replaces/overwrites status "0" entry for this room if present.
+  // If only status "1" entries exist, calculates totalGuestsSoFar, checks remaining, and inserts if possible.
   function updateLocalStorageEntry(room, guestsToAdd, timestamp, status = "0", totalFromQR = null) {
     const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-    // Find index of existing entry for this room with status "0"
+
+    // Check how many guests have already had breakfast (status "1")
+    const totalGuestsSoFar = localData.reduce((sum, entry) => {
+      const [r, g, , s] = entry.split(",");
+      return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
+    }, 0);
+
+    let newGuests = parseInt(guestsToAdd);
+    if (totalFromQR !== null) {
+      const remaining = totalFromQR - totalGuestsSoFar;
+      if (remaining <= 0) return;
+      newGuests = Math.min(newGuests, remaining);
+    }
+
+    if (newGuests <= 0) return;
+
+    const newData = `${room},${newGuests},${timestamp},0`;
+
+    // Look for existing status "0" entry to overwrite
     const index = localData.findIndex(entry => {
       const [r, , , s] = entry.split(",");
       return r === room && s === "0";
     });
 
-    let newGuests = parseInt(guestsToAdd);
-    if (totalFromQR !== null) {
-      // Calculate total guests with status "1" for this room
-      const totalGuestsSoFar = localData.reduce((sum, entry) => {
-        const [r, g, , s] = entry.split(",");
-        return (r === room && s === "1") ? sum + parseInt(g || "0") : sum;
-      }, 0);
-      if (totalGuestsSoFar + newGuests > totalFromQR) {
-        newGuests = totalFromQR - totalGuestsSoFar;
-      }
-    }
-
-    if (newGuests <= 0) return;
-
-    // Always set isComplete to "0" (대기 상태) until the room button is pressed.
-    const isComplete = "0";
-
-    const newData = `${room},${newGuests},${timestamp},${isComplete}`;
-    // Only update an existing entry if status is "0" (waiting).
-    // If not found, always add a new entry, even if a status "1" entry for this room exists.
     if (index !== -1) {
       localData[index] = newData;
     } else {
