@@ -461,12 +461,10 @@ document.addEventListener("DOMContentLoaded", () => {
       correctLevel: QRCode.CorrectLevel.H
     });
     document.getElementById("qrOverlay").style.display = "flex";
-    // Make overlay dismissible by clicking outside the popup
+    // Make overlay dismissible by clicking anywhere on the overlay (including the popup)
     const qrOverlay = document.getElementById("qrOverlay");
-    qrOverlay.addEventListener("click", function (e) {
-      if (e.target === qrOverlay) {
-        qrOverlay.style.display = "none";
-      }
+    qrOverlay.addEventListener("click", function () {
+      qrOverlay.style.display = "none";
     });
   });
 
