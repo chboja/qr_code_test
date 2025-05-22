@@ -137,10 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
     html5QrCode.start(
       { facingMode: "user" },
       {
-        fps: 10,
+        fps: 15,
         qrbox: function(viewfinderWidth, viewfinderHeight) {
           const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-          const boxSize = Math.floor(minEdge * 0.7);
+          const boxSize = Math.floor(minEdge * 0.85);
           return { width: boxSize, height: boxSize };
         }
       },
@@ -332,10 +332,10 @@ document.addEventListener("DOMContentLoaded", () => {
       html5QrCode.start(
         { facingMode: "user" },
         {
-          fps: 10,
+          fps: 15,
           qrbox: function(viewfinderWidth, viewfinderHeight) {
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
+            const boxSize = Math.floor(minEdge * 0.85);
             return { width: boxSize, height: boxSize };
           }
         },
