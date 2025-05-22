@@ -1,4 +1,4 @@
-const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbyJwWeDVnIpBq397kD6NMiv2qTNrfD7AkTaXg2QR1Ldtlit0D3J45CznX2dY0tgm7KWaQ/exec";
+const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwApxm8xTJ_wRU78n0mXT6jaO4Dv7mKHAxOKuWyQIIYyLcW4nrjShnOZJnn8KcSN-xBag/exec";
 let reservationSet = new Set();
 
 function preloadReservationList() {
