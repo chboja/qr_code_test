@@ -200,14 +200,17 @@ wanakanaScript.onload = () => {
 
       showSearchOverlay();
       const searchTerm = normalize(baseInput);
-      // --- Logging for room search JSONP ---
-      console.log("📤 Sending room term to GAS:", searchTerm);
-      const script = document.createElement("script");
-      const apiUrl = getSheetApiUrl();
-      const query = `mode=searchRoom&callback=handleRoomSearchResult&room=${encodeURIComponent(searchTerm)}`;
-      script.src = `${apiUrl}?${query}`;
-      console.log("📤 Full script URL:", script.src);
-      document.body.appendChild(script);
+      let foundResults = [];
+
+      cachedGuestList.forEach(guest => {
+        if (!guest.room) return;
+        const guestRoom = String(guest.room).toLowerCase();
+        if (guestRoom.includes(searchTerm)) {
+          foundResults.push(guest);
+        }
+      });
+
+      handleRoomSearchResult({ success: true, matches: foundResults });
     });
   }
 };
@@ -453,8 +456,8 @@ document.addEventListener("DOMContentLoaded", () => {
     popupQR.innerHTML = "";
     new QRCode(popupQR, {
       text: qrText,
-      width: 220,
-      height: 220,
+      width: 300,
+      height: 300,
       correctLevel: QRCode.CorrectLevel.H
     });
     document.getElementById("qrOverlay").style.display = "flex";
