@@ -101,10 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 4. Check for previous entry for the same room in localStorage
       const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-      const existingEntry = localData.find(entry => entry.split(",")[0] === room);
+      // Use the second field (index 1) for room match
+      const existingEntry = localData.find(entry => entry.split(",")[1] === room);
 
       if (existingEntry) {
-        const [, prevGuests, prevTimestamp] = existingEntry.split(",");
+        // [timestamp, room, guests]
+        const [prevTimestamp, , prevGuests] = existingEntry.split(",");
         const overlay = document.createElement("div");
         overlay.className = "custom-alert-overlay";
         overlay.innerHTML = `
