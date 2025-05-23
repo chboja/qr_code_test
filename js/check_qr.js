@@ -64,8 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const cancelBtn = document.getElementById("customPromptCancel");
       const confirmBtn = document.getElementById("customPromptConfirm");
-      if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
-      if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
+      if (cancelBtn) cancelBtn.innerHTML = "キャンセル";
+      if (confirmBtn) confirmBtn.innerHTML = "確定";
     });
   }
 
@@ -142,7 +142,10 @@ window.handleVerifyResponse = function(response) {
     alert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。");
   }
 };
-  // --- Guest count modal button handlers ---
+
+// --- Guest count modal button handlers ---
+// Move these event listeners inside DOMContentLoaded to ensure elements exist
+document.addEventListener("DOMContentLoaded", () => {
   const inputEl = document.getElementById("guestCountInput");
   const decreaseBtn = document.getElementById("decreaseGuestBtn");
   const increaseBtn = document.getElementById("increaseGuestBtn");
@@ -165,3 +168,4 @@ window.handleVerifyResponse = function(response) {
       inputEl.value = "1";
     };
   }
+});
