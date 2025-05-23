@@ -99,19 +99,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // 4. Check for previous entry for the same room in localStorage
+      // 4. Check for previous entries for the same room in localStorage
       const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
-      // Use the second field (index 1) for room match
-      const existingEntry = localData.find(entry => entry.split(",")[1] === room);
-
-      if (existingEntry) {
-        // [timestamp, room, guests]
-        const [prevTimestamp, , prevGuests] = existingEntry.split(",");
+      const roomEntries = localData.filter(entry => entry.split(",")[1] === room);
+      if (roomEntries.length > 0) {
+        const sortedEntries = roomEntries.sort((a, b) => new Date(a.split(",")[0]) - new Date(b.split(",")[0]));
+        const details = sortedEntries.map(entry => {
+          const [ts, , g] = entry.split(",");
+          return `${ts.slice(11, 16)} ${g}名`;
+        }).join("<br>");
         const overlay = document.createElement("div");
         overlay.className = "custom-alert-overlay";
         overlay.innerHTML = `
           <div class="custom-alert-box">
-            <p>${room}号室以前の記録があります：<br>${prevTimestamp.slice(11, 16)} ${prevGuests}名</p>
+            <p>${room}号室以前の記録があります：<br>${details}</p>
             <div class="custom-prompt-buttons">
               <button id="cancelExisting">キャンセル</button>
               <button id="continueExisting">続ける</button>
