@@ -111,10 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.className = "custom-alert-overlay";
         overlay.innerHTML = `
           <div class="custom-alert-box">
-            <p>以前に登録された情報があります：<br>${room}号 ${prevGuests}名 ${prevTimestamp}</p>
+            <p>${room}号室以前の記録があります：<br>${prevTimestamp.slice(11, 16)} ${prevGuests}名</p>
             <div class="custom-prompt-buttons">
-              <button id="continueExisting">続ける</button>
               <button id="cancelExisting">キャンセル</button>
+              <button id="continueExisting">続ける</button>
             </div>
           </div>
         `;
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("customPromptOverlay").style.display = "flex";
       const promptLabel = document.getElementById("customPromptLabel");
       if (promptLabel) {
-        promptLabel.innerText = "人数入力";
+        promptLabel.innerText = `${room}号室：人数入力`;
       }
       const cancelBtn = document.getElementById("customPromptCancel");
       const confirmBtn = document.getElementById("customPromptConfirm");
