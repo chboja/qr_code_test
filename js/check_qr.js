@@ -1,3 +1,7 @@
+// --- Duplicate scan guard variables ---
+let lastScannedText = "";
+let lastScannedTime = 0;
+
 async function generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }) {
   const secret = "HOTEL_ONLY_SECRET_KEY";
   const data = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag}`;
@@ -29,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   preloadReservationList();
-  const qrResult = document.getElementById("qrResult");
   const qrRegionId = "preview";
   const html5QrCode = new Html5Qrcode(qrRegionId);
 
@@ -70,6 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function onScanSuccess(decodedText, decodedResult) {
+    const now = Date.now();
+    if (decodedText === lastScannedText && now - lastScannedTime < 5000) return;
+    lastScannedText = decodedText;
+    lastScannedTime = now;
     qrResult.value = decodedText;
     handleQrProcessing(decodedText);
     // html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
@@ -97,17 +104,18 @@ document.addEventListener("DOMContentLoaded", () => {
     qrResult.value = "カメラへのアクセスに失敗しました。";
   });
 
-  const searchButton = document.getElementById("searchButton");
-  if (searchButton) {
-    searchButton.addEventListener("click", () => {
-      const qrText = qrResult.value.trim();
-      if (!qrText) {
-        alert("QRコードが読み取られていません。");
-        return;
-      }
-      handleQrProcessing(qrText);
-    });
-  }
+  // const qrResult = document.getElementById("qrResult");
+  // const searchButton = document.getElementById("searchButton");
+  // if (searchButton) {
+  //   searchButton.addEventListener("click", () => {
+  //     const qrText = qrResult.value.trim();
+  //     if (!qrText) {
+  //       alert("QRコードが読み取られていません。");
+  //       return;
+  //     }
+  //     handleQrProcessing(qrText);
+  //   });
+  // }
 
   const overlay = document.createElement("div");
   overlay.id = "loadingOverlay";
