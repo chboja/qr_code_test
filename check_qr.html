@@ -12,7 +12,7 @@
   <h1>QRコードスキャン</h1>
   <div class="container">
     <section>
-      <div id="preview" style="width: 100%; max-width: 400px; margin: 0 auto 20px;"></div>
+      <div id="preview" class="qr-preview"></div>
       <label for="qrResult">読み取り結果</label>
       <input type="text" id="qrResult" placeholder="QRコードの内容がここに表示されます" />
       <button id="searchButton">検索</button>
@@ -20,6 +20,22 @@
         <div id="breakfast-check-table"></div>
       </div>
     </section>
+  </div>
+
+  <!-- Custom Guest Count Popup Modal -->
+  <div id="customPromptOverlay" class="custom-prompt-overlay">
+    <div class="custom-prompt-box">
+      <p id="customPromptLabel">朝食を取る人数を入力してください。<br>Please enter the number of guests for breakfast.</p>
+      <div class="guest-count-wrapper">
+        <button id="decreaseGuestBtn" type="button">−</button>
+        <input type="text" id="guestCountInput" value="1" readonly />
+        <button id="increaseGuestBtn" type="button">＋</button>
+      </div>
+      <div class="custom-prompt-buttons">
+        <button id="customPromptCancel" type="button">キャンセル<br>Cancel</button>
+        <button id="customPromptConfirm" type="button">確定<br>Confirm</button>
+      </div>
+    </div>
   </div>
 </body>
 </html>

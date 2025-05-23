@@ -207,3 +207,78 @@ button:hover {
   padding: 6px;
   font-size: 14px;
 }
+
+/* === QR Preview & Custom Prompt Modal Styles === */
+.qr-preview {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 20px;
+}
+
+.custom-prompt-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-prompt-box {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.custom-prompt-box p {
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.guest-count-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.guest-count-wrapper input {
+  width: 80px;
+  height: 48px;
+  text-align: center;
+  font-size: 24px;
+  background-color: #f8f8f8;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 12px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.custom-prompt-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.custom-prompt-buttons button {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background-color: #2e86de;
+  color: white;
+}
+
+.custom-prompt-buttons button:hover {
+  background-color: #1b4f9c;
+}

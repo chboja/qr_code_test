@@ -7,12 +7,71 @@ async function generateHash({ room, checkIn, checkOut, guests, reservation }) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Preload reservation list ---
+  const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwApxm8xTJ_wRU78n0mXT6jaO4Dv7mKHAxOKuWyQIIYyLcW4nrjShnOZJnn8KcSN-xBag/exec";
+  let reservationSet = new Set();
+
+  function preloadReservationList() {
+    const callback = "handleReservationList";
+    const query = `mode=reservationList&callback=${callback}`;
+    const script = document.createElement("script");
+    script.src = `${SCRIPT_BASE_URL}?${query}`;
+    document.body.appendChild(script);
+  }
+
+  window.handleReservationList = function(response) {
+    if (response.success && Array.isArray(response.reservations)) {
+      reservationSet = new Set(response.reservations);
+      console.log("📥 예약번호 리스트 로컬에 저장됨:", reservationSet);
+    } else {
+      console.warn("⚠️ 예약번호 리스트 불러오기 실패");
+    }
+  };
+
+  preloadReservationList();
   const qrResult = document.getElementById("qrResult");
   const qrRegionId = "preview";
   const html5QrCode = new Html5Qrcode(qrRegionId);
 
+
+  // Shared QR processing logic for both scan and button click
+  function handleQrProcessing(decodedText) {
+    const parts = decodedText.split(',');
+    if (parts.length !== 6) {
+      alert("QRコードの形式が正しくありません。");
+      return;
+    }
+
+    const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
+    generateHash({ room, checkIn, checkOut, guests, reservation }).then(calculatedHash => {
+      if (calculatedHash !== hashFromQR) {
+        alert("❌ QRコードが不正です。");
+        return;
+      }
+
+      const isValidReservation = reservationSet.has(reservation.toLowerCase().split(/[-_]/)[0]);
+      if (!isValidReservation) {
+        alert("⚠️ QRコードの情報が変更された可能性があります。フロントでご確認ください。");
+        return;
+      }
+
+      window.currentRoomText = room;
+      document.getElementById("guestCountInput").value = guests;
+      document.getElementById("customPromptOverlay").style.display = "flex";
+      const promptLabel = document.getElementById("customPromptLabel");
+      if (promptLabel) {
+        promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+      }
+      const cancelBtn = document.getElementById("customPromptCancel");
+      const confirmBtn = document.getElementById("customPromptConfirm");
+      if (cancelBtn) cancelBtn.innerHTML = "キャンセル<br>Cancel";
+      if (confirmBtn) confirmBtn.innerHTML = "確定<br>Confirm";
+    });
+  }
+
   function onScanSuccess(decodedText, decodedResult) {
     qrResult.value = decodedText;
+    handleQrProcessing(decodedText);
     html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
   }
 
@@ -40,57 +99,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const searchButton = document.getElementById("searchButton");
   if (searchButton) {
-    searchButton.addEventListener("click", async () => {
+    searchButton.addEventListener("click", () => {
       const qrText = qrResult.value.trim();
       if (!qrText) {
         alert("QRコードが読み取られていません。");
         return;
       }
-
-      const parts = qrText.split(',');
-      if (parts.length !== 6) {
-        alert("QRコードの形式が正しくありません。");
-        return;
-      }
-
-      const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
-      const calculatedHash = await generateHash({ room, checkIn, checkOut, guests, reservation });
-
-      if (calculatedHash !== hashFromQR) {
-        alert("❌ QRコードが不正です。");
-        return;
-      }
-
-      document.getElementById("loadingOverlay").style.display = "flex";
-
-      // ✅ 서버에 예약번호와 해쉬값 검증 요청
-      try {
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbxwRK1JiiHP8dkZCNI1s1M4Iuy00Rp7Y7WOVgaXEFw0fyE81vDC4LfszmkFfwGduVHH4A/exec";
-        const verifyUrl = `${scriptUrl}?callback=handleVerifyResponse&hashcode=${encodeURIComponent(hashFromQR)}&verifyReservation=${encodeURIComponent(reservation)}`;
-
-        const script = document.createElement("script");
-        console.log(verifyUrl);
-        script.src = verifyUrl;
-        document.body.appendChild(script);
-      } catch (err) {
-        console.error("Verification request failed:", err);
-        alert("サーバーとの確認中にエラーが発生しました。");
-      }
-
-      html5QrCode.start(
-        { facingMode: "user" },
-        {
-          fps: 10,
-          qrbox: function(viewfinderWidth, viewfinderHeight) {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.floor(minEdge * 0.7);
-            return { width: boxSize, height: boxSize };
-          }
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("検索後にQRスキャナ再起動エラー:", err);
-      });
+      handleQrProcessing(qrText);
     });
   }
 
