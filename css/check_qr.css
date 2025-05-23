@@ -345,3 +345,12 @@ button:hover {
 .inline-button:hover {
   background-color: #1b4f9c;
 }
+.custom-alert-box.custom-alert-duplicate {
+  font-size: 14px;
+  padding: 20px 24px;
+}
+
+.custom-alert-box.custom-alert-duplicate p {
+  font-size: 14px;
+  line-height: 1.4;
+}
