@@ -1,6 +1,6 @@
-async function generateHash({ room, checkIn, checkOut, guests, reservation }) {
+async function generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }) {
   const secret = "HOTEL_ONLY_SECRET_KEY";
-  const data = `${room},${checkIn},${checkOut},${reservation}`;
+  const data = `${room},${checkIn},${checkOut},${guests},${reservation},${breakfastFlag}`;
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data + secret));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
@@ -37,13 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Shared QR processing logic for both scan and button click
   function handleQrProcessing(decodedText) {
     const parts = decodedText.split(',');
-    if (parts.length !== 6) {
+    if (parts.length !== 7) {
       alert("QRコードの形式が正しくありません。");
       return;
     }
 
-    const [room, checkIn, checkOut, guests, reservation, hashFromQR] = parts;
-    generateHash({ room, checkIn, checkOut, guests, reservation }).then(calculatedHash => {
+    const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+    generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
       if (calculatedHash !== hashFromQR) {
         alert("❌ QRコードが不正です。");
         return;
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function onScanSuccess(decodedText, decodedResult) {
     qrResult.value = decodedText;
     handleQrProcessing(decodedText);
-    html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
+    // html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
   }
 
   Html5Qrcode.getCameras().then(devices => {
