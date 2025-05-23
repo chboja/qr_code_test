@@ -220,7 +220,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("customPromptOverlay").style.display = "none";
     showCustomAlert("登録しました。");
     lastScannedText = "";
-    restartQrScanner();
+    html5QrCode.stop().then(() => {
+      restartQrScanner();
+    }).catch(() => {
+      restartQrScanner();
+    });
   };
 
   // Hook confirm button to submitGuestCount
