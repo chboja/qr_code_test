@@ -125,23 +125,34 @@ document.addEventListener("DOMContentLoaded", () => {
     qrResult.value = "カメラへのアクセスに失敗しました。";
   });
 
+  // --- Reusable QR scanner restart function ---
+  function restartQrScanner() {
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length > 0) {
+        const backCamera = devices.find(device =>
+          device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')
+        ) || devices[devices.length - 1];
+
+        html5QrCode.start(
+          { deviceId: { exact: backCamera.id } },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onScanSuccess
+        ).catch(err => {
+          console.error("カメラ再起動エラー:", err);
+        });
+      }
+    });
+  }
+
   // --- Reinitialize camera on page visibility change ---
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length > 0) {
-          const backCamera = devices.find(device =>
-            device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')
-          ) || devices[devices.length - 1];
-
-          html5QrCode.start(
-            { deviceId: { exact: backCamera.id } },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            onScanSuccess
-          ).catch(err => {
-            console.error("カメラの再起動に失敗しました:", err);
-          });
-        }
+      html5QrCode.stop().then(() => {
+        console.log("✅ カメラセッション停止完了");
+        restartQrScanner();
+      }).catch(err => {
+        console.warn("⚠️ カメラ停止失敗またはすでに停止済み", err);
+        restartQrScanner();
       });
     }
   });
