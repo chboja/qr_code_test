@@ -32,6 +32,17 @@ async function generateHash({ room, checkIn, checkOut, guests, reservation, brea
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Helper to get current formatted time ---
+  function getCurrentFormattedTime() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const sec = String(now.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
+  }
   // --- Preload reservation list ---
   const SCRIPT_BASE_URL = "https://script.google.com/macros/s/AKfycbwApxm8xTJ_wRU78n0mXT6jaO4Dv7mKHAxOKuWyQIIYyLcW4nrjShnOZJnn8KcSN-xBag/exec";
   let reservationSet = new Set();
@@ -67,18 +78,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
+
+    // 1. Check if Room Only (breakfastFlag === "0")
+    if (breakfastFlag === "0") {
+      showCustomAlert("Room Onlyプランです。");
+      return;
+    }
+
+    // 2. Generate hash and compare
     generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
       if (calculatedHash !== hashFromQR) {
-        showCustomAlert("❌ QRコードが不正です。");
+        showCustomAlert("フロントでご確認ください。");
         return;
       }
 
+      // 3. Validate reservation number
       const isValidReservation = reservationSet.has(reservation.toLowerCase().split(/[-_]/)[0]);
       if (!isValidReservation) {
-        showCustomAlert("⚠️ QRコードの情報が変更された可能性があります。フロントでご確認ください。");
+        showCustomAlert("フロントでご確認ください。");
         return;
       }
 
+      // 4. Check for previous entry for the same room in localStorage
+      const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+      const existingEntry = localData.find(entry => entry.split(",")[0] === room);
+
+      if (existingEntry) {
+        const [, prevGuests, prevTimestamp] = existingEntry.split(",");
+        const overlay = document.createElement("div");
+        overlay.className = "custom-alert-overlay";
+        overlay.innerHTML = `
+          <div class="custom-alert-box">
+            <p>以前に登録された情報があります：<br>${room}号 ${prevGuests}名 ${prevTimestamp}</p>
+            <div class="custom-prompt-buttons">
+              <button id="continueExisting">続ける</button>
+              <button id="cancelExisting">キャンセル</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById("continueExisting").onclick = () => {
+          overlay.remove();
+          document.getElementById("guestCountInput").value = guests;
+          document.getElementById("customPromptOverlay").style.display = "flex";
+        };
+        document.getElementById("cancelExisting").onclick = () => {
+          overlay.remove();
+        };
+        return;
+      }
+
+      // 5. All checks passed, show guest input popup
       window.currentRoomText = room;
       document.getElementById("guestCountInput").value = guests;
       document.getElementById("customPromptOverlay").style.display = "flex";
@@ -142,6 +192,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     });
+  }
+
+  // --- Submit guest count from custom modal ---
+  window.submitGuestCount = function () {
+    const guests = document.getElementById("guestCountInput").value;
+    const room = window.currentRoomText;
+    const timestamp = getCurrentFormattedTime();
+
+    if (!guests || !room) {
+      showCustomAlert("部屋番号または人数が不明です。");
+      return;
+    }
+
+    const query = new URLSearchParams({
+      mode: "breakfastSubmit",
+      callback: "handlePostResponse",
+      room: room,
+      guests: guests,
+      timestamp: timestamp
+    });
+
+    const script = document.createElement("script");
+    script.src = `${SCRIPT_BASE_URL}?${query.toString()}`;
+    document.body.appendChild(script);
+
+    document.getElementById("customPromptOverlay").style.display = "none";
+    showCustomAlert("登録しました。");
+    lastScannedText = "";
+    restartQrScanner();
+  };
+
+  // Hook confirm button to submitGuestCount
+  const customPromptConfirm = document.getElementById("customPromptConfirm");
+  if (customPromptConfirm) {
+    customPromptConfirm.onclick = window.submitGuestCount;
   }
 
   // --- Reinitialize camera on page visibility change ---
