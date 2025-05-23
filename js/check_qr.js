@@ -32,6 +32,15 @@ async function generateHash({ room, checkIn, checkOut, guests, reservation, brea
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Clean up old localStorage entries (not from today) ---
+  const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+  const today = new Date().toISOString().slice(0, 10);
+  const todayList = localData.filter(entry => {
+    const [ts] = entry.split(",");
+    return ts.slice(0, 10) === today;
+  });
+  localStorage.setItem("waitingList", JSON.stringify(todayList));
+
   // --- "全記録" button event handler ---
   const viewAllBtn = document.getElementById("viewAllRecordsBtn");
   if (viewAllBtn) {
@@ -162,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = document.createElement("div");
         overlay.className = "custom-alert-overlay";
         overlay.innerHTML = `
-          <div class="custom-alert-box">
+          <div class="custom-alert-box custom-alert-duplicate">
             <p>${room}号室以前の記録があります<br>${details}</p>
             <div class="custom-prompt-buttons">
               <button id="cancelExisting">キャンセル</button>
