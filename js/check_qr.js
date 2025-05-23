@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("customPromptOverlay").style.display = "flex";
       const promptLabel = document.getElementById("customPromptLabel");
       if (promptLabel) {
-        promptLabel.innerText = "朝食を取る人数を入力してください。\nPlease enter the number of guests for breakfast.";
+        promptLabel.innerText = "人数入力";
       }
       const cancelBtn = document.getElementById("customPromptCancel");
       const confirmBtn = document.getElementById("customPromptConfirm");
@@ -142,3 +142,26 @@ window.handleVerifyResponse = function(response) {
     alert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。");
   }
 };
+  // --- Guest count modal button handlers ---
+  const inputEl = document.getElementById("guestCountInput");
+  const decreaseBtn = document.getElementById("decreaseGuestBtn");
+  const increaseBtn = document.getElementById("increaseGuestBtn");
+  if (decreaseBtn && inputEl) {
+    decreaseBtn.onclick = () => {
+      let val = parseInt(inputEl.value) || 1;
+      if (val > 1) inputEl.value = val - 1;
+    };
+  }
+  if (increaseBtn && inputEl) {
+    increaseBtn.onclick = () => {
+      let val = parseInt(inputEl.value) || 1;
+      inputEl.value = val + 1;
+    };
+  }
+  const customPromptCancel = document.getElementById("customPromptCancel");
+  if (customPromptCancel && inputEl) {
+    customPromptCancel.onclick = () => {
+      document.getElementById("customPromptOverlay").style.display = "none";
+      inputEl.value = "1";
+    };
+  }
