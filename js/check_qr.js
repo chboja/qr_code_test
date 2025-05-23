@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.innerHTML = `
           <div class="custom-alert-box custom-alert-duplicate">
             <p>${room}号室以前の記録があります<br>${details}</p>
-            <div class="custom-prompt-buttons">
+            <div class="custom-prompt-buttons duplicate-buttons">
               <button id="cancelExisting">キャンセル</button>
               <button id="continueExisting">続ける</button>
             </div>

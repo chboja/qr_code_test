@@ -354,3 +354,8 @@ button:hover {
   font-size: 14px;
   line-height: 1.4;
 }
+.duplicate-buttons button {
+  font-size: 13px;
+  padding: 6px 12px;
+  min-width: 90px;
+}
