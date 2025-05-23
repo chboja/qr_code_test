@@ -217,6 +217,12 @@ document.addEventListener("DOMContentLoaded", () => {
     script.src = `${SCRIPT_BASE_URL}?${query.toString()}`;
     document.body.appendChild(script);
 
+    // Save guest info to localStorage
+    const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+    const newEntry = `${timestamp},${room},${guests}`;
+    localData.push(newEntry);
+    localStorage.setItem("waitingList", JSON.stringify(localData));
+
     document.getElementById("customPromptOverlay").style.display = "none";
     showCustomAlert("登録しました。");
     lastScannedText = "";
@@ -319,3 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 });
+  // --- JSONP global callback for breakfastSubmit ---
+  window.handlePostResponse = function(response) {
+    console.log("📦 서버 응답:", response);
+  };
