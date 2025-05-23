@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (decodedText === lastScannedText && now - lastScannedTime < 5000) return;
     lastScannedText = decodedText;
     lastScannedTime = now;
-    qrResult.value = decodedText;
+    // qrResult.value = decodedText;
     handleQrProcessing(decodedText);
     // html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
   }
