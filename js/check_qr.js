@@ -1,3 +1,24 @@
+// --- Custom Alert Helper ---
+function showCustomAlert(message) {
+  const overlay = document.createElement("div");
+  overlay.className = "custom-alert-overlay";
+  overlay.innerHTML = `
+    <div class="custom-alert-box">
+      <p>${message.replace(/\n/g, "<br>")}</p>
+      <button id="customAlertClose">OK</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById("customAlertClose").onclick = () => {
+    overlay.remove();
+  };
+
+  setTimeout(() => {
+    if (document.body.contains(overlay)) overlay.remove();
+  }, 3000);
+}
+
 // --- Duplicate scan guard variables ---
 let lastScannedText = "";
 let lastScannedTime = 0;
@@ -41,20 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleQrProcessing(decodedText) {
     const parts = decodedText.split(',');
     if (parts.length !== 7) {
-      alert("QRコードの形式が正しくありません。");
+      showCustomAlert("QRコードの形式が正しくありません。");
       return;
     }
 
     const [room, checkIn, checkOut, guests, reservation, breakfastFlag, hashFromQR] = parts;
     generateHash({ room, checkIn, checkOut, guests, reservation, breakfastFlag }).then(calculatedHash => {
       if (calculatedHash !== hashFromQR) {
-        alert("❌ QRコードが不正です。");
+        showCustomAlert("❌ QRコードが不正です。");
         return;
       }
 
       const isValidReservation = reservationSet.has(reservation.toLowerCase().split(/[-_]/)[0]);
       if (!isValidReservation) {
-        alert("⚠️ QRコードの情報が変更された可能性があります。フロントでご確認ください。");
+        showCustomAlert("⚠️ QRコードの情報が変更された可能性があります。フロントでご確認ください。");
         return;
       }
 
@@ -104,6 +125,27 @@ document.addEventListener("DOMContentLoaded", () => {
     qrResult.value = "カメラへのアクセスに失敗しました。";
   });
 
+  // --- Reinitialize camera on page visibility change ---
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length > 0) {
+          const backCamera = devices.find(device =>
+            device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')
+          ) || devices[devices.length - 1];
+
+          html5QrCode.start(
+            { deviceId: { exact: backCamera.id } },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            onScanSuccess
+          ).catch(err => {
+            console.error("カメラの再起動に失敗しました:", err);
+          });
+        }
+      });
+    }
+  });
+
   // const qrResult = document.getElementById("qrResult");
   // const searchButton = document.getElementById("searchButton");
   // if (searchButton) {
@@ -136,18 +178,18 @@ document.addEventListener("DOMContentLoaded", () => {
 window.handleVerifyResponse = function(response) {
   document.getElementById("loadingOverlay").style.display = "none";
   if (!response.success) {
-    alert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。⚠️");
+    showCustomAlert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。⚠️");
   } else if (response.match === true) {
     const breakfastFlag = Number(response.breakfastFlag);
     if (breakfastFlag === 0) {
-      alert("Room Onlyの部屋です。");
+      showCustomAlert("Room Onlyの部屋です。");
     } else if (breakfastFlag === 1) {
-      alert("朝食付き部屋です。");
+      showCustomAlert("朝食付き部屋です。");
     } else {
-      alert("✅ QRコードがデータベースと一致しました。");
+      showCustomAlert("✅ QRコードがデータベースと一致しました。");
     }
   } else {
-    alert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。");
+    showCustomAlert("⚠️QRコードの情報が変更された可能性があります。フロントでご確認ください。");
   }
 };
 
