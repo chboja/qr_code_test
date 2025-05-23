@@ -164,9 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.innerHTML = `
           <div class="custom-alert-box">
             <p>${room}号室以前の記録があります<br>${details}</p>
-            <div class="custom-prompt-buttons">
-              <button id="cancelExisting">キャンセル</button>
-              <button id="continueExisting">続ける</button>
+            <div class="custom-prompt-buttons" style="gap: 20px;">
+              <button id="cancelExisting" style="min-width: 100px;">キャンセル</button>
+              <button id="continueExisting" style="min-width: 100px;">続ける</button>
             </div>
           </div>
         `;
