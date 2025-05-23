@@ -41,9 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const filtered = localData.filter(entry => {
         const [ts] = entry.split(",");
         const date = ts.slice(0, 10);
-        const hour = parseInt(ts.slice(11, 13));
-        const minute = parseInt(ts.slice(14, 16));
-        return date === today && (hour > 6 || (hour === 6 && minute >= 30)) && hour < 11;
+        return date === today;
       }).sort((a, b) => new Date(a.split(",")[0]) - new Date(b.split(",")[0]));
 
       const content = filtered.map(entry => {
@@ -165,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.className = "custom-alert-overlay";
         overlay.innerHTML = `
           <div class="custom-alert-box">
-            <p>${room}号室以前の記録があります：<br>${details}</p>
+            <p>${room}号室以前の記録があります<br>${details}</p>
             <div class="custom-prompt-buttons">
               <button id="cancelExisting">キャンセル</button>
               <button id="continueExisting">続ける</button>
@@ -190,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("customPromptOverlay").style.display = "flex";
       const promptLabel = document.getElementById("customPromptLabel");
       if (promptLabel) {
-        promptLabel.innerText = `${room}号室：人数入力`;
+        promptLabel.innerText = `${room}号室人数入力`;
       }
       const cancelBtn = document.getElementById("customPromptCancel");
       const confirmBtn = document.getElementById("customPromptConfirm");
