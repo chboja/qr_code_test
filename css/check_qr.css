@@ -333,3 +333,16 @@ button:hover {
 .custom-alert-box button:hover {
   background-color: #1b4f9c;
 }
+.inline-button {
+  padding: 10px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2e86de;
+  color: white;
+  cursor: pointer;
+}
+
+.inline-button:hover {
+  background-color: #1b4f9c;
+}

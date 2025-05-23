@@ -32,6 +32,59 @@ async function generateHash({ room, checkIn, checkOut, guests, reservation, brea
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // --- "全記録" button event handler ---
+  const viewAllBtn = document.getElementById("viewAllRecordsBtn");
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => {
+      const localData = JSON.parse(localStorage.getItem("waitingList") || "[]");
+      const today = new Date().toISOString().slice(0, 10);
+      const filtered = localData.filter(entry => {
+        const [ts] = entry.split(",");
+        const date = ts.slice(0, 10);
+        const hour = parseInt(ts.slice(11, 13));
+        const minute = parseInt(ts.slice(14, 16));
+        return date === today && (hour > 6 || (hour === 6 && minute >= 30)) && hour < 11;
+      }).sort((a, b) => new Date(a.split(",")[0]) - new Date(b.split(",")[0]));
+
+      const content = filtered.map(entry => {
+        const [ts, room, guests] = entry.split(",");
+        return `${ts.slice(11, 16)} - ${room}号室 ${guests}名`;
+      }).join("<br>");
+
+      const overlay = document.createElement("div");
+      overlay.className = "custom-alert-overlay";
+      overlay.innerHTML = `
+        <div class="custom-alert-box">
+          <p>${content || "該当する記録がありません。"}</p>
+          <button id="customAlertClose">OK</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      document.getElementById("customAlertClose").onclick = () => {
+        overlay.remove();
+      };
+    };
+  }
+  // --- "追加" (manual entry) button event handler ---
+  let manualRoomNumber = 101; // starting room number for manual entries
+  const addManualBtn = document.getElementById("addManualEntryBtn");
+  if (addManualBtn) {
+    addManualBtn.onclick = () => {
+      window.currentRoomText = String(manualRoomNumber);
+      document.getElementById("guestCountInput").value = "1";
+      document.getElementById("customPromptOverlay").style.display = "flex";
+      const promptLabel = document.getElementById("customPromptLabel");
+      if (promptLabel) {
+        promptLabel.innerText = `${manualRoomNumber}号室：人数入力`;
+      }
+      const cancelBtn = document.getElementById("customPromptCancel");
+      const confirmBtn = document.getElementById("customPromptConfirm");
+      if (cancelBtn) cancelBtn.innerHTML = "キャンセル";
+      if (confirmBtn) confirmBtn.innerHTML = "確定";
+      manualRoomNumber += 1;
+    };
+  }
   // --- Helper to get current formatted time ---
   function getCurrentFormattedTime() {
     const now = new Date();
