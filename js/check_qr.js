@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function onScanSuccess(decodedText, decodedResult) {
     const now = Date.now();
-    if (decodedText === lastScannedText && now - lastScannedTime < 5000) return;
+    if (decodedText === lastScannedText && now - lastScannedTime < 3000) return;
     lastScannedText = decodedText;
     lastScannedTime = now;
     // qrResult.value = decodedText;
