@@ -182,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(overlay);
         document.getElementById("continueExisting").onclick = () => {
           overlay.remove();
+          window.currentRoomText = room;
           document.getElementById("guestCountInput").value = guests;
           document.getElementById("customPromptOverlay").style.display = "flex";
         };
