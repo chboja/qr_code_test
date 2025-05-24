@@ -311,6 +311,8 @@ button:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   text-align: center;
   max-width: 80%;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .custom-alert-box p {
@@ -347,13 +349,13 @@ button:hover {
 }
 .custom-alert-box.custom-alert-duplicate {
   font-size: 15px;
-  padding: 30px 36px;
-  max-width: 90%;
+  padding: 36px 40px;
+  max-width: 95%;
 }
 
 .custom-alert-box.custom-alert-duplicate p {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.8;
 }
 .duplicate-buttons button {
   font-size: 13px;
