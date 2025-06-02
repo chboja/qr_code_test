@@ -1,3 +1,4 @@
+let isScanning = false;
 // --- Custom Alert Helper ---
 function showCustomAlert(message) {
   const overlay = document.createElement("div");
@@ -237,23 +238,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start camera with selected deviceId
     function startSelectedCamera() {
       const selectedId = cameraSelect.value;
-      html5QrCode.stop().then(() => {
+      const startCamera = () => {
         html5QrCode.start(
           { deviceId: { exact: selectedId } },
           { fps: 10, qrbox: { width: 250, height: 250 } },
           onScanSuccess
-        ).catch(err => {
+        ).then(() => {
+          isScanning = true;
+        }).catch(err => {
           console.error("카메라 시작 실패:", err);
         });
-      }).catch(() => {
-        html5QrCode.start(
-          { deviceId: { exact: selectedId } },
-          { fps: 10, qrbox: { width: 250, height: 250 } },
-          onScanSuccess
-        ).catch(err => {
-          console.error("카메라 시작 실패:", err);
+      };
+
+      if (isScanning) {
+        html5QrCode.stop().then(() => {
+          isScanning = false;
+          startCamera();
+        }).catch(err => {
+          console.warn("카메라 중지 실패 또는 이미 중지됨:", err);
+          startCamera();
         });
-      });
+      } else {
+        startCamera();
+      }
     }
 
     cameraSelect.onchange = startSelectedCamera;
@@ -312,8 +319,10 @@ document.addEventListener("DOMContentLoaded", () => {
     showCustomAlert("登録しました。");
     lastScannedText = "";
     html5QrCode.stop().then(() => {
+      isScanning = false;
       restartQrScanner();
     }).catch(() => {
+      isScanning = false;
       restartQrScanner();
     });
   };
@@ -328,10 +337,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       html5QrCode.stop().then(() => {
-        console.log("✅ カメラセッション停止完了");
+        console.log("✅ 카메라세션 중지");
+        isScanning = false;
         restartQrScanner();
       }).catch(err => {
-        console.warn("⚠️ カメラ停止失敗またはすでに停止済み", err);
+        console.warn("⚠️ 카메라 중지 실패 또는 이미 중지됨", err);
+        isScanning = false;
         restartQrScanner();
       });
     }
