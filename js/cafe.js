@@ -378,6 +378,10 @@ window.handleRoomSearchResult = function(response) {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // --- 초기 게스트 목록 가져오기 (qr_create와 동일) ---
+  if (location.pathname.includes("cafe.html")) {
+    fetchGuestFullList();
+  }
 
   // --- 하루 지난 조식 이용자 데이터 삭제 ---
   const storedData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
