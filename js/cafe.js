@@ -119,7 +119,7 @@ function kanaFullToHalf(str){
 }
 
 wanakanaScript.onload = () => {
-  if (location.pathname.includes("qr_create.html")) {
+  if (location.pathname.includes("cafe.html")) {
     // --- Fetch guest full list for suggestions and search on page load ---
     fetchGuestFullList();
   }
@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("breakfastList", JSON.stringify(filteredData));
   const SHEET_NAME_SEARCH_API = getSheetApiUrl();
 
-  if (location.pathname.includes("qr_create.html")) {
+  if (location.pathname.includes("cafe.html")) {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
