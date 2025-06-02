@@ -238,9 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start camera with selected deviceId
     function startSelectedCamera() {
       const selectedId = cameraSelect.value;
+      // ▶️ 선택된 카메라 ID, 정보 로그 추가
+      const selectedDevice = devices.find(d => d.id === selectedId);
+      console.log("▶️ 선택된 카메라 ID:", selectedId);
+      console.log("▶️ 선택된 카메라 정보:", selectedDevice);
       const startCamera = () => {
-        // ▶️ 선택된 카메라 로그 추가
-        console.log("▶️ 선택된 카메라:", devices.find(d => d.id === selectedId)?.label || selectedId);
         html5QrCode.start(
           { deviceId: { exact: selectedId } },
           { fps: 10, qrbox: { width: 250, height: 250 } },
