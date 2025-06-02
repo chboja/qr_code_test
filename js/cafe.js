@@ -238,19 +238,20 @@ const normalize = str => toHalfWidth(str).toLowerCase();
 
 function fillFormWithData(data) {
   console.log("🧾 fillFormWithData:", data);
+  // 이름, 방 번호, 체크인/체크아웃, 인원 수 및 예약번호 채우기
   document.getElementById("name").value = data.name || "";
   document.getElementById("room").value = data.room || "";
   document.getElementById("checkIn").value = data.checkIn || "";
   document.getElementById("checkOut").value = data.checkOut || "";
   document.getElementById("guests").value = data.guestCount || "";
-  // Reservation: only use part before '-' or '_'
   const rawReservation = data.reservation || "";
   const cleanedReservation = rawReservation.split(/[-_]/)[0];
   document.getElementById("reservation").value = cleanedReservation;
-  document.getElementById("payment").value = data.unpaid !== undefined ? String(data.unpaid) : "";
-  // Set breakfast toggle
+
+  // --- 조식 토글 업데이트 ---
   const breakfastHidden = document.getElementById("breakfastHidden");
   const toggleOptions = document.querySelectorAll(".toggle-option");
+  // data.breakfastFlag가 숫자 1 또는 문자열 "1"일 때 'O', 그 외엔 'X'
   let val = (data.breakfastFlag === 1 || data.breakfastFlag === "1") ? "O" : "X";
   breakfastHidden.value = val;
   toggleOptions.forEach(option => {
@@ -260,7 +261,8 @@ function fillFormWithData(data) {
       option.classList.remove("active");
     }
   });
-  // Show alert popup if memo exists
+
+  // 메모가 있으면 팝업으로 표시
   if (data.memo && data.memo.trim() !== "") {
     alert(`📌 メモ:\n${data.memo}`);
   }
@@ -369,6 +371,44 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const form = document.getElementById("qrForm");
+
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const room = document.getElementById("room").value.trim();
+      const guests = document.getElementById("guests").value.trim();
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const sec = String(now.getSeconds()).padStart(2, '0');
+      const timestamp = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
+
+      const query = new URLSearchParams({
+        mode: "breakfastSubmit",
+        callback: "handleCafeResponse",
+        room: room,
+        guests: guests,
+        timestamp: timestamp
+      });
+      const script = document.createElement("script");
+      script.src = `${getSheetApiUrl()}?${query.toString()}`;
+      document.body.appendChild(script);
+
+      const breakfastData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
+      const newBreakfastEntry = `${timestamp},${room},${guests}`;
+      breakfastData.push(newBreakfastEntry);
+      localStorage.setItem("breakfastList", JSON.stringify(breakfastData));
+    });
+  }
+
+  window.handleCafeResponse = function(response) {
+    console.log("📦 Cafe Response:", response);
+    alert("登録が完了しました。");
+    if (form) form.reset();
+  };
 
   // --- Name input suggestion feature ---
   const nameInput = document.getElementById("name");
