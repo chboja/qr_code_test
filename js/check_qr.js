@@ -217,26 +217,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // html5QrCode.stop().catch(err => console.error("Failed to stop scanner:", err));
   }
 
+  // --- Create camera selection dropdown ---
   Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length > 0) {
-      const backCamera = devices.find(device =>
-        device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')
-      ) || devices[devices.length - 1];
+    const cameraSelect = document.createElement("select");
+    cameraSelect.id = "cameraSelect";
+    cameraSelect.style.position = "absolute";
+    cameraSelect.style.top = "10px";
+    cameraSelect.style.left = "10px";
+    cameraSelect.style.zIndex = 10000;
+    cameraSelect.style.fontSize = "16px";
+    devices.forEach(device => {
+      const option = document.createElement("option");
+      option.value = device.id;
+      option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+      cameraSelect.appendChild(option);
+    });
+    document.body.appendChild(cameraSelect);
 
-      html5QrCode.start(
-        { deviceId: { exact: backCamera.id } },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        onScanSuccess
-      ).catch(err => {
-        console.error("Camera start error:", err);
-        qrResult.value = "カメラの起動に失敗しました。";
+    // Start camera with selected deviceId
+    function startSelectedCamera() {
+      const selectedId = cameraSelect.value;
+      html5QrCode.stop().then(() => {
+        html5QrCode.start(
+          { deviceId: { exact: selectedId } },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onScanSuccess
+        ).catch(err => {
+          console.error("카메라 시작 실패:", err);
+        });
+      }).catch(() => {
+        html5QrCode.start(
+          { deviceId: { exact: selectedId } },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onScanSuccess
+        ).catch(err => {
+          console.error("카메라 시작 실패:", err);
+        });
       });
-    } else {
-      qrResult.value = "カメラが見つかりませんでした。";
     }
-  }).catch(err => {
-    console.error("Camera access error:", err);
-    qrResult.value = "カメラへのアクセスに失敗しました。";
+
+    cameraSelect.onchange = startSelectedCamera;
+    startSelectedCamera(); // 초기 실행
   });
 
   // --- Reusable QR scanner restart function ---
