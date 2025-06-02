@@ -87,6 +87,10 @@ const getSheetApiUrl = () => 'https://script.google.com/macros/s/AKfycbydq0Sx4ED
 const wanakanaScript = document.createElement("script");
 wanakanaScript.src = "https://unpkg.com/wanakana";
 document.head.appendChild(wanakanaScript);
+// --- qr_create와 동일하게 페이지 로드 시 즉시 게스트 목록 가져오기 ---
+if (location.pathname.includes("cafe.html")) {
+  fetchGuestFullList();
+}
 
 // Convert full-width katakana to half-width katakana (including voiced/semi-voiced marks)
 function kanaFullToHalf(str){
