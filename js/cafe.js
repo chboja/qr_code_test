@@ -233,6 +233,15 @@ wanakanaScript.onload = () => {
       handleRoomSearchResult({ success: true, matches: foundResults });
     });
   }
+  // ✅ 朝食トグルのクリック動作を追加
+  const toggleOptions = document.querySelectorAll(".toggle-option");
+  toggleOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      toggleOptions.forEach(o => o.classList.remove("active"));
+      option.classList.add("active");
+      document.getElementById("breakfastHidden").value = option.dataset.value;
+    });
+  });
 };
 
 
@@ -369,6 +378,7 @@ window.handleRoomSearchResult = function(response) {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+
   // --- 하루 지난 조식 이용자 데이터 삭제 ---
   const storedData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
   const today = new Date().toISOString().slice(0, 10);
