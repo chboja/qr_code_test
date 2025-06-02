@@ -238,9 +238,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start camera with selected deviceId
     function startSelectedCamera() {
       const selectedId = cameraSelect.value;
-      // ▶️ 선택된 카메라 ID, 정보 로그 추가
       const selectedDevice = devices.find(d => d.id === selectedId);
-      console.log("▶️ 선택된 카메라 ID:", selectedId);
+      let label = selectedDevice?.label?.trim();
+      if (!label) {
+        label = selectedId.includes("front") ? "전면 카메라"
+               : selectedId.includes("back") ? "후면 카메라"
+               : `카메라 (${selectedId.slice(0, 6)}...)`;
+      }
+      console.log("▶️ 선택된 카메라:", label);
       console.log("▶️ 선택된 카메라 정보:", selectedDevice);
       const startCamera = () => {
         html5QrCode.start(
