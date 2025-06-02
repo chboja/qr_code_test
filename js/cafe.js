@@ -560,7 +560,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const roomInput = document.getElementById("room");
   if (roomInput) {
     roomInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
