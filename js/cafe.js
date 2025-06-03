@@ -440,29 +440,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Name input suggestion feature ---
   const nameInput = document.getElementById("name");
-  // 입력 필드 클릭 시 기존 입력값 초기화
-  const clearAllFields = () => {
-    document.getElementById("name").value = "";
-    document.getElementById("room").value = "";
-    document.getElementById("checkIn").value = "";
-    document.getElementById("checkOut").value = "";
-    document.getElementById("guests").value = "";
-    document.getElementById("reservation").value = "";
-    document.getElementById("breakfastHidden").value = "";
-    document.querySelectorAll(".toggle-option").forEach(o => o.classList.remove("active"));
-  };
-
-  if (nameInput) {
-    nameInput.addEventListener("focus", clearAllFields);
-  }
   const roomInput = document.getElementById("room");
-  if (roomInput) {
-    roomInput.addEventListener("focus", clearAllFields);
-  }
   const guestsInput = document.getElementById("guests");
-  if (guestsInput) {
-    guestsInput.addEventListener("focus", clearAllFields);
-  }
 
   // Suggestion box setup
   const suggestionBox = document.createElement("ul");
