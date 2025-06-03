@@ -289,3 +289,44 @@ label {
   padding: 20px;
   border-radius: 10px;
 }
+# Custom duplicate alert overlay and box */
+.custom-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.custom-alert-box {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+}
+
+.custom-alert-duplicate p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.custom-alert-duplicate button {
+  padding: 8px 16px;
+  margin: 0 8px;
+  background-color: #2e86de;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.custom-alert-duplicate button:hover {
+  background-color: #1b4f9c;
+}
