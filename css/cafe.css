@@ -289,7 +289,7 @@ label {
   padding: 20px;
   border-radius: 10px;
 }
-# Custom duplicate alert overlay and box */
+/* Custom duplicate alert overlay and box */
 .custom-alert-overlay {
   position: fixed;
   top: 0;

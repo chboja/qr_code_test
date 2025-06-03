@@ -474,9 +474,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- View all local records for today ---
+  const viewAllBtn = document.getElementById("viewAllRecordsBtn");
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener("click", () => {
+      const storedData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
+      const today = new Date().toISOString().slice(0, 10);
+      const todayEntries = storedData
+        .filter(entry => entry.split(",")[0].slice(0, 10) === today)
+        .sort((a, b) => new Date(a.split(",")[0]) - new Date(b.split(",")[0]));
+
+      const content = todayEntries.length
+        ? todayEntries.map(entry => {
+            const [ts, room, guests] = entry.split(",");
+            return `${ts.slice(11, 16)} - ${room}号室 ${guests}名`;
+          }).join("<br>")
+        : "該当する記録がありません。";
+
+      // Create overlay
+      const overlay = document.createElement("div");
+      overlay.className = "custom-alert-overlay";
+      overlay.innerHTML = `
+        <div class="custom-alert-box">
+          <p>${content}</p>
+          <button id="closeAllRecords">OK</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      document.getElementById("closeAllRecords").onclick = () => {
+        overlay.remove();
+      };
+    });
+  }
+
   window.handleCafeResponse = function(response) {
     console.log("📦 Cafe Response:", response);
-    alert("登録が完了しました。");
     if (form) form.reset();
   };
 
