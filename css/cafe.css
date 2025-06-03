@@ -306,6 +306,8 @@ label {
 .custom-alert-box {
   background-color: #fff;
   padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
   border-radius: 10px;
   text-align: center;
   max-width: 80%;
