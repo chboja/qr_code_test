@@ -1,6 +1,6 @@
 function getScriptUrl() {
   // 아래 URL을 배포된 Apps Script 웹 앱 주소로 교체하세요
-  return "https://script.google.com/macros/s/AKfycbydq0Sx4EDAb0eRbdmNwrSEZzCFAEmeiCLF5w7IxnsOdxGqBhi7ZyS4xee2SCTXpPcKaw/exec";
+  return "https://script.google.com/macros/s/AKfycbwRMjixETPUjWHof-vbb4I1s4lf7Cn53HzkmobHgzkgudZrwuNIbMShgrGoDx87OhvDsQ/exec";
 }
 
 // NOTE: 아래 YOUR_DEPLOYED_SCRIPT_ID를 실제 Google Apps Script의 배포 ID로 교체하세요!
@@ -65,26 +65,26 @@ function handleStatsResponse(response) {
 
   console.log("✅ 통계 데이터:", response);
 
-  // 전체 방 수 계산
+  // 전체 방 수 계산 및 room only guest 수 반영
   const totalRoom = response.totalRoom || 0;
-  const roomOnlyCount = response.roomOnlyCount || 0;
+  const roomOnlyGuests = response.roomOnlyGuests || 0;
   const usedBreakfastRoomSet = new Set(response.rows.map(row => row.room));
   const usedBreakfastRoom = usedBreakfastRoomSet.size;
-  const unusedBreakfastRoom = totalRoom - usedBreakfastRoom - roomOnlyCount;
+  const unusedBreakfastRoom = totalRoom - usedBreakfastRoom - roomOnlyGuests;
 
   // 퍼센트 계산
-  const usedRate = Math.round((usedBreakfastRoom / totalRoom) * 100);
-  const unusedRate = Math.round((unusedBreakfastRoom / totalRoom) * 100);
-  const roomOnlyRate = Math.round((roomOnlyCount / totalRoom) * 100);
+  const usedRate = totalRoom > 0 ? Math.round((usedBreakfastRoom / totalRoom) * 100) : 0;
+  const unusedRate = totalRoom > 0 ? Math.round((unusedBreakfastRoom / totalRoom) * 100) : 0;
+  const roomOnlyRate = totalRoom > 0 ? Math.round((roomOnlyGuests / totalRoom) * 100) : 0;
 
   // 표에 값 표시 (퍼센트 포함)
   document.getElementById("total-room").textContent = `${totalRoom}`;
   document.getElementById("used-breakfast-room").textContent = `${usedBreakfastRoom} (${usedRate}％)`;
   document.getElementById("unused-breakfast-room").textContent = `${unusedBreakfastRoom} (${unusedRate}％)`;
-  document.getElementById("room-only-count").textContent = `${roomOnlyCount} (${roomOnlyRate}％)`;
+  document.getElementById("room-only-count").textContent = `${roomOnlyGuests} (${roomOnlyRate}％)`;
 
   // 총 이용객 수 계산
-  const guestSum = response.rows.reduce((sum, row) => sum + row.guests, 0);
+  const breakfastGuests = response.breakfastGuests || 0;
 
   // 날짜 차이 계산 (종료일 - 시작일 + 1일 포함)
   const start = new Date(document.getElementById("stats-start-date").value);
@@ -92,25 +92,22 @@ function handleStatsResponse(response) {
   const dateDiff = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
   // 일평균 계산
-  const guestAvg = Math.round(guestSum / dateDiff);
+  const guestAvg = Math.round(breakfastGuests / dateDiff);
 
-  // room only 총합 및 평균 계산
-  let roomOnlySum = 0;
-  for (const rooms of Object.values(response.roomOnly || {})) {
-    roomOnlySum += rooms.length;
-  }
-  const roomOnlyAvg = Math.round(roomOnlySum / dateDiff);
+  // room only 총합 (guest 수 합계) 및 평균 계산
+  const roomOnlySum = response.roomOnlyGuests || 0;
+  const roomOnlyAvg = totalRoom > 0 ? Math.round(roomOnlySum / dateDiff) : 0;
 
-  console.log("🚪 room only 총 방 수:", roomOnlySum);
-  console.log("📆 일평균 room only 방 수:", roomOnlyAvg);
+  console.log("🚪 room only 총 guest 수:", roomOnlySum);
+  console.log("📆 일평균 room only guest 수:", roomOnlyAvg);
 
   document.getElementById("sum-room-only").textContent = roomOnlySum;
   document.getElementById("avg-room-only").textContent = roomOnlyAvg;
-  document.getElementById("sum-guest").textContent = guestSum;
+  document.getElementById("sum-guest").textContent = breakfastGuests;
   document.getElementById("avg-guest").textContent = guestAvg;
 
   // 디버그 로그 출력
-  console.log("총 이용객 수:", guestSum);
+  console.log("총 이용객 수:", breakfastGuests);
   console.log("총 일수:", dateDiff);
   console.log("일평균 이용객 수:", guestAvg);
 
