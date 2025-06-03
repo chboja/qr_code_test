@@ -387,6 +387,67 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const room = document.getElementById("room").value.trim();
       const guests = document.getElementById("guests").value.trim();
+      if (!room || !guests) {
+        alert("部屋番号と利用者数を入力してください。");
+        return;
+      }
+      // Duplicate check: existing entries for same room
+      const storedData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
+      const roomEntries = storedData.filter(entry => entry.split(",")[1] === room);
+      if (roomEntries.length > 0) {
+        // Sort by timestamp
+        const sortedEntries = roomEntries.sort((a, b) => new Date(a.split(",")[0]) - new Date(b.split(",")[0]));
+        // Build details string
+        const details = sortedEntries.map(entry => {
+          const [ts, r, g] = entry.split(",");
+          return `${ts.slice(11, 16)} - ${r}号室 ${g}名`;
+        }).join("<br>");
+        // Create overlay
+        const overlay = document.createElement("div");
+        overlay.className = "custom-alert-overlay";
+        overlay.innerHTML = `
+          <div class="custom-alert-box custom-alert-duplicate">
+            <p>${room}号室の以前の記録があります:<br>${details}</p>
+            <div style="margin-top: 10px; display: flex; justify-content: center; gap: 10px;">
+              <button id="cancelExisting">キャンセル</button>
+              <button id="continueExisting">続ける</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById("cancelExisting").onclick = () => {
+          overlay.remove();
+        };
+        document.getElementById("continueExisting").onclick = () => {
+          overlay.remove();
+          // Proceed with registration and storage
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          const hh = String(now.getHours()).padStart(2, '0');
+          const min = String(now.getMinutes()).padStart(2, '0');
+          const sec = String(now.getSeconds()).padStart(2, '0');
+          const timestamp = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
+          const query = new URLSearchParams({
+            mode: "breakfastSubmit",
+            callback: "handleCafeResponse",
+            room: room,
+            guests: guests,
+            timestamp: timestamp
+          });
+          const script = document.createElement("script");
+          script.src = `${getSheetApiUrl()}?${query.toString()}`;
+          document.body.appendChild(script);
+          // Store to localStorage
+          const breakfastData = storedData;
+          const newBreakfastEntry = `${timestamp},${room},${guests}`;
+          breakfastData.push(newBreakfastEntry);
+          localStorage.setItem("breakfastList", JSON.stringify(breakfastData));
+        };
+        return;
+      }
+      // No duplicates, proceed directly
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -395,7 +456,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const min = String(now.getMinutes()).padStart(2, '0');
       const sec = String(now.getSeconds()).padStart(2, '0');
       const timestamp = `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec}`;
-
       const query = new URLSearchParams({
         mode: "breakfastSubmit",
         callback: "handleCafeResponse",
@@ -406,8 +466,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const script = document.createElement("script");
       script.src = `${getSheetApiUrl()}?${query.toString()}`;
       document.body.appendChild(script);
-
-      const breakfastData = JSON.parse(localStorage.getItem("breakfastList") || "[]");
+      // Store to localStorage
+      const breakfastData = storedData;
       const newBreakfastEntry = `${timestamp},${room},${guests}`;
       breakfastData.push(newBreakfastEntry);
       localStorage.setItem("breakfastList", JSON.stringify(breakfastData));
