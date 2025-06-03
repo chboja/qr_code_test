@@ -327,6 +327,7 @@ label {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .custom-alert-duplicate button:hover {
