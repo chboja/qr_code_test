@@ -310,7 +310,7 @@ label {
   overflow-y: auto;
   border-radius: 10px;
   text-align: center;
-  max-width: 80%;
+  max-width: 90%;
 }
 
 .custom-alert-duplicate p {

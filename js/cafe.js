@@ -444,6 +444,10 @@ document.addEventListener("DOMContentLoaded", () => {
           const newBreakfastEntry = `${timestamp},${room},${guests}`;
           breakfastData.push(newBreakfastEntry);
           localStorage.setItem("breakfastList", JSON.stringify(breakfastData));
+          // Clear form inputs after registration
+          if (form) form.reset();
+          document.getElementById("breakfastHidden").value = "";
+          document.querySelectorAll(".toggle-option").forEach(o => o.classList.remove("active"));
         };
         return;
       }
@@ -471,6 +475,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const newBreakfastEntry = `${timestamp},${room},${guests}`;
       breakfastData.push(newBreakfastEntry);
       localStorage.setItem("breakfastList", JSON.stringify(breakfastData));
+      // Clear form inputs after registration
+      if (form) form.reset();
+      document.getElementById("breakfastHidden").value = "";
+      document.querySelectorAll(".toggle-option").forEach(o => o.classList.remove("active"));
     });
   }
 
